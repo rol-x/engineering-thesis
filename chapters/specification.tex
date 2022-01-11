@@ -1,14 +1,30 @@
 \chapter{Specification}
 \label{ch:specification}
-How will the topic of this thesis be implemented? How do I combine the aforementioned technologies? What is the actual example that I'm using? Describe the specification from the outside (helicopter view).
+What is the actual example that I'm using? Describe the specification from the outside (helicopter view).
+
+Implementation of the thesis topic will by nature involve a containerization software (\textit{here Docker}), which will host several subapplications written as semi-standalone scripts, each responsible for a part of the data pipeline. Using Python and its vast collection of libraries I'm handling the data scraping, intial cleaning and maintenance of the pre-stage database in compressed CSV files; as well as managing the MySQL database, creating helper tables, extracting new information and visualizing the data to answer user's questions. With JavaScript, SQL and HTML, I'm able to present the results in form of a simple web application, querying the database connected to the \textit{Node.js} server.
 
 
 \section{Functional requirements}
-Wymagania funkcjonalne.
+\begin{enumerate}
+\item The user should be able to collect data about chosen cards expansion
+\item The data gathering system should run continuously and gather data once a day
+\item The gathering system should visit all card sites from specified expansion and save (a) card information, dynamic and static, and (b) full information about sale offers of this card to CSV files
+\item The gathering system should visit profile pages of all newly-encountered sellers and save their public data to a CSV file
+\item The gathering system should keep track of the date and save the date data into a CSV file
+\item The database manager system should run continuously and update the database whenever new complete batch of data has been gathered
+\item The data miner system should run continuously and create data marts every hour, given the database has the newest data
+\item The web application should run continuously, recovering from fatal errors and providing the user with at least four ways of getting useful information from the data
+\end{enumerate}
 
 
 \section{Non-functional requirements}
-Wymagania niefunkcjonalne.
+\begin{enumerate}
+\item The total time of data processing should be less than 6 hours
+\item The system should be standalone (bootstrapping itself from \textit{docker-compose.yml} and code), and cross-platform compatible
+\item The gathering system should adapt the requests frequency to the server condition
+\item No user input is required after running the system
+\end{enumerate}
 
 
 \section{Problem domain}
@@ -18,11 +34,13 @@ Trading card games (\textit{TCG}), also known as collectible card games (\textit
 The first TCG was released in 1993 under the name Magic: The Gathering (\textit{MTG}). The game, released by an eight-person company, was an overnight success, with over 10 million cards sold in just 6 weeks.
 Two years later, this basement business became a gaming corporation. Today, \textit{MTG} is among the most popular TCGs with roughly 35 million players as of December 2018 \cite{magicTheGathering}. \par
 During the game, the goal of each player is to reduce the opponent's life points by strategically playing cards from the hand, before the other one succeeds. However, each player can compile their own deck of 60\footnote{Some variations require a deck of 40 cards, which are selected from a random pool of cards} cards out of the thousands available. This makes every gameplay unique on a level which is fundamentally different from the classic cards. One doens't have to be an expert in the field to understand that the more cards one has, especially good cards, the higher the chances of winning. Thus, trading the cards becomes an aspect as crucial as the strategy itself. \par
-One of the places where \textit{MTG} cards can be bought is \url{www.cardsmarket.com/} --- an online market with a myriad of cards from the game listed for sale, by users from around the world, majority of which lives in Europe. Users are divided into three categories: \textit{Amateur}, \textit{Professional} and \textit{Powerseller}, depending on their setup and \textit{modus operandi} (individuals, zealous hobbyists, card stores). To spend the least amount of money while collecting the most wanted cards, i.e. to optimize the shopping, one would have to analyze thousands of bits of data, from the average prices of all cards, to the velocity of sales and restocking the virtual shelves.
+One of the places where \textit{MTG} cards can be bought is \url{www.cardsmarket.com/} --- an online market with a myriad of cards from the game listed for sale, by users from around the world, majority of which lives in Europe. Users are divided into three categories: \textit{Amateur}, \textit{Professional} and \textit{Powerseller}, depending on their setup and \textit{modus operandi} (individuals, zealous hobbyists, card stores). To spend the least amount of money while collecting the most wanted cards, i.e. to optimize the shopping, one would have to analyze thousands of bits of data, from the average prices of all cards, to the velocity of sales and of restocking the virtual shelves.
 
 \subsection{Decision optimization}
 Describe the cards (with their statistics --- static entity, dynamic entity). Also sellers and sale offers.
 Describe what we want to do with the gathered data and to what means.
+
+When the data from the card market is collected, it is stored in five CSV files and one text file. The text file contains card names in the order of first visit and it's used to maintain consistent card-to-card progression between runs. The card entity has only static attributes: the card's \textbf{id}, \textbf{name}, \textbf{rarity} and what \textbf{expansion} is this card in.
 
 
 \section{Data warehouse modelling}
