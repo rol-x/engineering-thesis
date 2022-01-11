@@ -1,0 +1,62 @@
+\chapter{Data gathering implementation}
+\label{ch:gathering}
+What is implemented in this subproject, so that it fulfills its purpose?
+What does the program do? Step by step.
+
+
+\section{Program configuration}
+What is in config.py file?
+Which values are shared among containers?
+Which are modifiable and which are not?
+
+
+\section{Used services}
+What is my service? (What is a service?)
+Why do I use modules as services?
+Why don't I use objective programming?
+What is the purpose of each of the services in this subproject?
+
+\subsection{Web service}
+What is this service all about?
+
+
+\section{Local directories}
+How are they setup, what will they contain?
+
+
+\section{Run scheduling}
+How is the run scheduled?
+Does it keep trying when faced with exceptions?
+
+
+\section{Data pickling and validation}
+What are the formats of the data? Why is csv compressed?
+What are pickles for? What were the obstacles (dictionary fiasco)?
+
+
+\section{Loop over cards}
+Page url crafting, getting the page, explicit wait.
+Trying to exhaust the Load more button, explicit wait.
+Getting the soup object from HTML page source.
+Decomposition of the soup. Increament START\_FROM.
+Clean and unpickle the data, revisit scheduling.
+
+
+\section{Soup decomposition}
+Getting card name, and adding this card if not present. Card id.
+Getting card statistics, adding them.
+
+\subsection{Sale offers table}
+Understanding the table of sale offers.
+Getting all seller names from the table.
+Filtering the seller names as a set difference with saved.
+Iterating over pages of sellers profiles, scraping the data.
+Sellers added one by one, with append(seller: dict) --- pickles fiasco.
+Updating sale offers.
+
+
+\section{Data pipeline output}
+What happens when the program is finished?
+How does the data look, where is it?
+How do other containers know when to act?
+

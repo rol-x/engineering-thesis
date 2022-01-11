@@ -1,0 +1,37 @@
+\usepackage[utf8]{inputenc}
+\usepackage{textcomp}
+\usepackage{gensymb}
+\usepackage{epsf,graphicx}
+\usepackage{subfigure}
+\usepackage{latexsym,amssymb}
+\usepackage{setspace}
+\usepackage{indentfirst}
+\usepackage{mathtools}
+\usepackage[justification=centering]{caption}
+\usepackage{multirow}
+\usepackage{epigraph}
+\usepackage{float}
+\usepackage{hyperref}
+\usepackage{blindtext}
+\usepackage{biblatex}
+\usepackage[figuresright]{rotating}
+\usepackage{fancyhdr}
+
+% for margins left, right top bottom
+\usepackage{anysize}
+\marginsize{3cm}{2.5cm}{2.5cm}{2.5cm}
+\let\origdoublepage\cleardoublepage
+\newcommand{\clearemptydoublepage}{
+  \clearpage
+  {\pagestyle{empty}\origdoublepage}}
+\let\cleardoublepage\clearemptydoublepage
+
+% Add bibliography list file and ToC entry
+\addbibresource{other/bibliography.bib}
+\DefineBibliographyStrings{english}{%
+  bibliography = {Bibliography},
+}
+
+%\usepackage{draft} %draft option - doesn't put full figures in -
+            % useful when editing
+

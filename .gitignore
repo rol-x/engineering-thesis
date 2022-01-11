@@ -1,0 +1,14 @@
+# Log files
+*.log
+
+# PDF compilation files
+thesis.*
+*.aux
+!*.pdf
+!*.tex
+
+# Temporary PDFs
+thesis_tmp.pdf
+temp.pdf
+tmp.pdf
+thesis_temp.pdf

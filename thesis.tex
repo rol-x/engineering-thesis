@@ -1,0 +1,38 @@
+% !TeX root = thesis.tex
+\documentclass[twoside,a4paper,12pt]{book}
+\usepackage{other/setup}
+\begin{document}
+
+% Spacing between lines and paragraphs
+\onehalfspacing
+\setlength{\parskip}{1ex}
+
+% Chapter names in headers, page numbers centrally in the foot
+\setlength\headheight{15pt}
+\fancyhead[LE]{\sl\leftmark}
+\fancyhead[LO,RE]{\rm\thepage}
+\fancyhead[RO]{\sl\rightmark}
+\fancyfoot[C]{\thepage}
+
+% Title page
+\include{other/header.tex}
+\pagenumbering{arabic}
+
+\include{chapters/intro.tex}
+\include{chapters/basis.tex}
+\include{chapters/specification.tex}
+\include{chapters/architecture.tex}
+\include{chapters/gathering.tex}
+\include{chapters/database.tex}
+\include{chapters/mining.tex}
+\include{chapters/results.tex}
+\include{chapters/summary.tex}
+
+% Bibliography
+\printbibliography[heading=bibintoc]
+
+% Appendices
+\appendix
+\include{other/appendix.tex}
+
+\end{document}

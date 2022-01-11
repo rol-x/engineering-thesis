@@ -1,0 +1,72 @@
+\chapter{Project basis}
+\label{ch:basis}
+% \setlength{\epigraphwidth}{10.8cm}
+\setlength{\epigraphwidth}{8.8cm}
+\epigraph{\textit{``Data is the sword of the 21st century, \\\hspace{2.4cm}those who wield it well, the Samurai."}}{--- Jonatan Rosenerg, former Senior Vice President of Products, Google}
+
+In the contemporary world, the Internet facilitates the backbone of world-wide services, including e-commerce, transportation, entertainment and businesses. This relatively recent change presented an open world of possibilities, with new creative ideas emerging every year. In comparison to the reality of the past, the amount of information available at hand is unprecedently greater than ever before, constituting an advancement so significant, it can be argued to be as important as the invention of the printing press or even written language. Tapping into this immense ocean of knowledge is possible by utilizing adequate tools, like programming languages capable of producing specifically targeted scripts. This potentially is a fertile ground for automatization, and to take advantage of it means to extend one's capability of processing information by severals orders of magnitude.
+
+
+% \begin{figure}[H]
+%     \begin{tabular}{|c|c|}
+%     \hline
+%     Year & Individuals using the Internet
+%     \\ \hline
+%     1990 & \textless 0.05 \%                                    \\ \hline
+%     2000 & 6.73 \%                                              \\ \hline
+%     2010 & 28.88 \%                                             \\ \hline
+%     2020 & 56.73 \%                                             \\ \hline
+%     \end{tabular}
+% \end{figure}
+
+\section{Data on the internet}
+What is the history of internet?
+What is the state of the internet today?
+How good is the average bandwidth?
+How are machines communicating with each other and to what means?
+Instant availability of information is only practical for computers, need to automate the gathering and analysis of data. Enter web scraping.
+
+
+\section{Python language}
+Python is high-level general-purpose programming language. It provides levels of abstraction from the machine architecture, so that user doesn't have to worry about e.g. managing memory allocation, and can be used to develop applications in many domains. Its history begins in December 1989, when a Dutch programmer, Guido von Rossum, became working on a successor to the ABC language \cite{thePython}. Released in 1991, with major consecutive versions in 2000 and 2008 (Python 3, current version), it today became a robust language for just about anything, from statistics and modelling, to webservers and RestAPIs. Python is taught in schools as an entry-level language, while at the same time being used by NASA\footnote{\url{https://github.com/nasa/podaacpy} is used for crucial communications with Jet Propulsion Laboratory}. \par
+Python offers a variety of modules and packages (also called libraries), i.e. collections of functionalities with provided interface for the user to utilize. Among the most popular libraries we have numpy --- for managing matrices and multi-dimensional tables similar to MATLAB; openCV --- for processing and analyzing images and videos; requests --- a simple HTTP library for communicating with the server; and many more. \par
+In my code I'm using several crucial libraries, which I will briefly describe below, as well as packages with less significance, which I list here:
+
+\begin{itemize}
+    \item checksumdir: utility for calculating a checksum of a given directory, similar to a file checksum, which I use to determine whether new data has arrived and whether that data is complete and can be passed further;
+    \item time: popular package for measuring time between two points in code, sleeping (i.e. stopping the execution) and getting information on the current date, mostly used for scheduling the run until the day changes and measuring performance of various code parts;
+    \item shutil: module for creating and removing non-empty directories, used by me to additionally isolate the shared data inside each container, so that it's invulnerable to changes in the original folder once running;
+    \item os: another popular library, utilized in my code for managing local files and ensuring proper directory structure on the first run, i.e. creating shared folders for storing data, logs and flags.
+\end{itemize}
+
+\subsection{Selenium and Beautiful Soup}
+These libraries make it possible to connect to any website and emulate user behaviour in an automatic fashion. Selenium is a framework responsible for creating a webdriver (virtual, in-code browser object) and visiting requested URLs, while looking for specific elements (like buttons for expanding the page) or deciding whether the response from the page is complete or it needs more time to load. Beautiful Soup on the other hand is a simple but powerful system for navigating HTML code. It provides support for finding particular webpage elements like \textit{div} or \textit{span}, by requesting their \textit{class}, \textit{id}, or any other attribute. Every HTML page is converted into a soup object, similar to a nested dictionary, which then can be searched using provided methods.
+
+\subsection{Numpy, Pandas and Scikit-learn}
+Numpy, briefly mentioned before, is a mathematical library which is a basis for many other libraries, such as Pandas or Scikit-learn. Pandas revolves around Dataframes and Series --- two- and one-dimensional data structures similar to Excel or SQL tables. One of the advantages is the speed of processing; selecting tens of thousands rows out of millions, based on some condition, is almost instantaneous. Dataframes come with set of tools for their manipulation, i.e. aggregation functions, joins, concatenation, etc. When this data is passed, scikit-learn is responsible for creating statistical models trying to find correlations, predict outcomes, as well as provide decision support based on the data. It is arguably one of the most important libraries in machine learning domain.
+
+\subsection{Matplotlib and Seaborn}
+Matplotlib and Seaborn are libraries for data visualization, where the latter is an extension of the former. Matplotlib gives basic plotting functionalities and proves to be a robust module, which can be used on its own. However, in order to reduce the amount of code written and standardize the outcomes, Seaborn is used to provide more complex visualizations without an extensive use of Matplotlib.
+
+
+\section{Docker containers}
+Containerization (or OS-level virtualization) is a way of isolating resources inside an operating system without using virtual machines (VMs), to create self-enclosed, lightweight executables. The key difference from VMs is that virtualization uses a hypervisor --- software that hosts guest operating systems and distributes hardware resources among them. Any process running inside a virtual machine only sees the guest operating system. Meanwhile, containerization uses only the host operating system and a container engine (e.g. \textit{Docker}). From the point of view of a process running inside a container, the directory structure may largely differ from what user sees on the disk. Container should have only the minimal number of libraries and dependencies required to run it. Generally speaking, containerization is a paradigm for the operating system kernel to allow many isolated \textit{user spaces} to exist in a shared environment, which translates to container sharing the filesystem with the host operating system without conflicts. However, recreating the container may mean losing all of our data and starting fresh. To avoid that, methods for data persistence are available, two of which are most popular and used in this project:
+
+\begin{itemize}
+    \item Docker volumes --- internal Docker storage, which persists removing the container image if stated explicitly. These volumes are not seen by the host OS.
+    \item Bind mounts --- specified directories inside the container, that will correspond to actual directories on the host operating system. This technique is similar to mounting an USB device in a filesystem.
+\end{itemize}
+
+The goal of containerization is to deploy applications securely and fast, without worrying about OS compatibility. The act of abstracting our software from the host operating system allows containers to be portable and stand-alone. Additionally, one can orchestrate many containers to run together and share the OS resources in order to perform a common task. This creates a perfect opportunity to use containerization for an application managing data warehouse, since the data has to go through many different stages in a pipeline, which correspond to separate processes, each inside its own container.
+
+
+\section{Data warehouses}
+Data warehouse is a data organization concept that originated in late 1980s in IBM \cite{dataWarehouses}. Barry Devlin and Paul Murphy were trying to find a way to optimize the processing of data from common source to different destinations, called decision support systems. These systems were composed of software taking various data as input, and producing a metric for finding solutions to a given problem. One example is using a decision support system highlighting unusual areas of a brain scan from a MRI, for faster recognition of potentially malicious changes. Before the practice of data warehousing, multiple systems had to acquire data independently from a business source, process it and then perform needed analysis. However, this approach yeilds several problems, most obvious of which is computational redundancy and consequently wasting of resources. \par
+Devlin and Murphy's idea was to find commonalities between different decision support systems, gather all the needed data at once, process it and then store it in a ready-to-use format. This way, any application could request a specific set of data, tailored for its needs, without the need to perform heavy computation every time. These datasets are called \textit{data marts}, and the isolation of decision support systems from their individual data sources proved to be a robust solution, that has quickly been implemented in businesses around the world. \par
+In my project I gather the data from various pages on the card market website, then I process and save it in a \textit{.csv} file format. These files are then read and converted to dataframes, which are converted to tables in a database. In order for another process to use the data efficiently, it is transformed into various data marts inside the database, creating a data pipeline from the source to the final program, which performs analysis. This way I'm utilizing data warehousing concepts, although I am only collecting data from a single source (one process responsible for data gathering) and delivering it to a single application.
+
+
+\section{Justification of the thesis topic}
+Why is my project centered around the issue?
+How do I use existing technology to solve an existing problem?
+What questions do I aim to answer?
