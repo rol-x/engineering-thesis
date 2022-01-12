@@ -36,12 +36,75 @@ Two years later, this basement business became a gaming corporation. Today, \tex
 During the game, the goal of each player is to reduce the opponent's life points by strategically playing cards from the hand, before the other one succeeds. However, each player can compile their own deck of 60\footnote{Some variations require a deck of 40 cards, which are selected from a random pool of cards} cards out of the thousands available. This makes every gameplay unique on a level which is fundamentally different from the classic cards. One doens't have to be an expert in the field to understand that the more cards one has, especially good cards, the higher the chances of winning. Thus, trading the cards becomes an aspect as crucial as the strategy itself. \par
 One of the places where \textit{MTG} cards can be bought is \url{www.cardsmarket.com/} --- an online market with a myriad of cards from the game listed for sale, by users from around the world, majority of which lives in Europe. Users are divided into three categories: \textit{Amateur}, \textit{Professional} and \textit{Powerseller}, depending on their setup and \textit{modus operandi} (individuals, zealous hobbyists, card stores). To spend the least amount of money while collecting the most wanted cards, i.e. to optimize the shopping, one would have to analyze thousands of bits of data, from the average prices of all cards, to the velocity of sales and of restocking the virtual shelves.
 
-\subsection{Decision optimization}
-Describe the cards (with their statistics --- static entity, dynamic entity). Also sellers and sale offers.
-Describe what we want to do with the gathered data and to what means.
+\subsection{Entities}
+Each card has a name, expansion, which is a higher-level grouping of cards, and rarity. These elements do not vary with time. However, the number of cards for sale, and automatically calculated price statistics change every day, that's why these are stored in a separate table, with new rows every day. Similarly, the seller has a name, country of residence and optionally an address, year of registration and what type of seller they are (private vs professional); while the table with sale offers stores every card offer from every seller, from each day. To add a unified time dimension to the data, a date table is created with unique \textit{date\_id} designating the day, month and year of the datapoint collection.
 
-When the data from the card market is collected, it is stored in five CSV files and one text file. The text file contains card names in the order of first visit and it's used to maintain consistent card-to-card progression between runs. The card entity has only static attributes: the card's \textbf{id}, \textbf{name}, \textbf{rarity} and what \textbf{expansion} is this card in.
-
+When the data from the card market is collected, it is stored in five CSV files and one text file. The text file, named after set expansion, contains card names in the order of first visit and it's used to maintain consistent card-to-card progression between runs. Then, each CSV file represents one entity: \textit{card}, \textit{seller} (static entities), \textit{card\_stats}, \textit{date} and \textit{sale\_offer} (dynamic entities).
 
 \section{Data warehouse modelling}
-Describe how is the data structured, based on the entities mentioned before. Show how does the data warehouse look like including all steps, explain why is it like this. Mention DWDMS and the outcome of that project, as well as differences between it and this thesis.
+The data warehouse was a focal point of the DWDMS course project. My part (\textit{data-gathering}) has been heavily improved (data compression, using pickle data format to speed up processing, redone services architecture, redone timing, and many more), while the rest has been written again, specifially for this thesis, by the author. The data warehouse lifecycle beings when the data is collected. The pre-stage area encompasses what is written in the CSV files after a data gathering run. The described entities have the following attributes.
+
+\subsection{Date}
+Stores a date dimension with a resolution of one day.
+\begin{itemize}
+\setlength\itemsep{0.2em}
+\item \textbf{id}: smallint
+\item day: tinyint
+\item month: tinyint
+\item year: smallint
+\item weekday: tinyint
+\end{itemize}
+
+\subsection{Card}
+Stores the cards' immutable information.
+\begin{itemize}
+\setlength\itemsep{0.2em}
+\item \textbf{id}: smallint
+\item name: varchar
+\item expansion: varchar
+\item rarity: varchar
+\end{itemize}
+
+\subsection{Seller}
+Stores the info on website users with at least one sale offer.
+\begin{itemize}
+\setlength\itemsep{0.2em}
+\item \textbf{id}: smallint
+\item name: varchar
+\item type: varchar
+\item member\_since: smallint
+\item country: varchar
+\item \textit{address}: varchar
+\end{itemize}
+
+\subsection{Card stats}
+Stores the date-dependent statistics regarding cards price and availability.
+\begin{itemize}
+\setlength\itemsep{0.2em}
+\item \textbf{id}: mediumint
+\item card\_id: smallint
+\item price\_from: decimal
+\item monthly\_avg: decimal
+\item weekly\_avg: decimal
+\item daily\_avg: decimal
+\item available\_items: mediumint
+\item date\_id: smallint
+\end{itemize}
+
+\subsection{Sale offer}
+Stores the data on sale offers from each day, including who is selling, what and for how much, card condition and others.
+\begin{itemize}
+\setlength\itemsep{0.2em}
+\item \textbf{id}: int
+\item seller\_id: smallint
+\item price: decimal
+\item card\_id: smallint
+\item card\_condition: varchar
+\item card\_language: varchar
+\item is\_foiled: tinyint
+\item amount: smallint
+\item date\_id: smallint
+\end{itemize}
+
+\subsection{Tables in MySQL}
+Initially, after the data is gathered from the website, it is stored in CSV files. Then, the database manager updates an image-based MySQL server running in Docker, creating the tables corresponding to each entity, and data miner adds new tables as data marts for future use, and performs other analyses and visualizations.
