@@ -42,13 +42,20 @@ Two years later, this basement business became a gaming corporation. Today, \tex
 During the game, the goal of each player is to reduce the opponent's life points by strategically playing cards from the hand, before the other one succeeds. However, each player can compile their own deck of 60\footnote{Some variations require a deck of 40 cards, which are selected from a random pool of cards} cards out of the thousands available. This makes every gameplay unique on a level which is fundamentally different from the classic cards. One doens't have to be an expert in the field to understand that the more cards one has, especially good cards, the higher the chances of winning. Thus, trading the cards becomes an aspect as crucial as the strategy itself. \par
 One of the places where \textit{MTG} cards can be bought is \url{www.cardsmarket.com/} --- an online market with a myriad of cards from the game listed for sale, by users from around the world, majority of which lives in Europe. Users are divided into three categories: \textit{Amateur}, \textit{Professional} and \textit{Powerseller}, depending on their setup and \textit{modus operandi} (individuals, zealous hobbyists, card stores). To spend the least amount of money while collecting the most wanted cards, i.e. to optimize the shopping, one would have to analyze thousands of bits of data, from the average prices of all cards, to the velocity of sales and of restocking the virtual shelves.
 
-\subsection{Entities}
-Each card has a name, expansion, which is a higher-level grouping of cards, and rarity. These elements do not vary with time. However, the number of cards for sale, and automatically calculated price statistics change every day, that's why these are stored in a separate table, with new rows every day. Similarly, the seller has a name, country of residence and optionally an address, year of registration and what type of seller they are (private vs professional); while the table with sale offers stores every card offer from every seller, from each day. To add a unified time dimension to the data, a date table is created with unique \textit{date\_id} designating the day, month and year of the datapoint collection.
+\subsection{Market-related entities}
+\label{entities}
+Each card has a name, an expansion, which is a higher-level grouping of cards, and rarity. These elements do not vary with time. However, the number of cards for sale, and automatically calculated price statistics change every day, that's why these are stored in a separate table, with new rows every day. Similarly, the seller has a name, country of residence and optionally an address, year of registration and what type of seller they are (private vs professional); while the table with sale offers stores every card offer from every seller, from each day. To add a unified time dimension to the data, a date table is created with unique \textit{date\_id} designating the day, month and year of the datapoint collection.
 
 When the data from the card market is collected, it is stored in five CSV files and one text file. The text file, named after set expansion, contains card names in the order of first visit and it's used to maintain consistent card-to-card progression between runs. Then, each CSV file represents one entity: \textit{card}, \textit{seller} (static entities), \textit{card\_stats}, \textit{date} and \textit{sale\_offer} (dynamic entities).
 
+\subsection{Problem formulation}
+Questions here.
+
 \section{Data warehouse modelling}
-The data warehouse lifecycle beings when the data is collected. The pre-stage area encompasses what is written in the CSV files after a gathering run. These files correspond to entities with the following attributes.
+The data warehouse lifecycle beings when the data is collected. The pre-stage area encompasses what is written in the CSV files after a gathering run. These files correspond to entities from subsection (\ref{entities}) and to the tables presented below.
+
+\subsection{Base tables}
+After the data is gathered from the website, and stored in the CSV files, the database manager updates an image-based MySQL server running in Docker, creating the tables corresponding to each entity --- and data miner adds new tables as data marts for future use, and performs other analyses and visualizations.
 
 \subsection*{Date}
 Stores a date dimension with one day increments.
@@ -112,7 +119,16 @@ Stores the data on sale offers from each day, including who is selling, what and
 \item date\_id: smallint
 \end{itemize}
 
-\section{Tables in MySQL}
-After the data is gathered from the website, and stored in the CSV files, the database manager updates an image-based MySQL server running in Docker, creating the tables corresponding to each entity --- and data miner adds new tables as data marts for future use, and performs other analyses and visualizations.
-
+\subsection{Helper views}
 List the new tables + one sentence about them?
+
+\section{Containers overview}
+The task of the \textit{firefox\_webdriver} container is to provide a constant and reliable access to a browser-like solution for an automated page navigation.
+
+The \textit{mysql\_database} container hosts a database with persistent memory, storing the major part of the data warehouse and making it accessible to other containers.
+
+The \textit{data\_gathering} subsystem automatically scrapes and collects the web data in the \textit{data} directory, while \textit{database\_manager} takes this data and passes it to the database. It is important for the \textit{database\_manager} to be slightly delayed with respect to \textit{data\_gathering}, for reasons that are explained in section (\ref{container_orchestration}).
+
+The \textit{data\_miner} and \textit{node\_server} containers are dependent only on the database, however here boot order and system state are not as important; these asynchonous containers perform their job properly when the data is ready and don't cause critial failure when it's not, which is enough for the application to run reliably.
+
+Each container has its own virtual storage, so to perform tasks on a shared set of data, both docker volumes and data mounts are introduced. Additionally, each container exposes one port internally to a port on the host, inside a network encompassing the whole solution.
