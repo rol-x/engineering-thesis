@@ -2,19 +2,24 @@
 \label{ch:specification}
 What is the actual example that I'm using? Describe the specification from the outside (helicopter view).
 
-Implementation of the thesis topic will by nature involve a containerization software (\textit{here Docker}), which will host several subapplications written as semi-standalone scripts, each responsible for a part of the data pipeline. Using Python and its vast collection of libraries I'm handling the data scraping, intial cleaning and maintenance of the pre-stage database in compressed CSV files; as well as managing the MySQL database, creating helper tables, extracting new information and visualizing the data to answer user's questions. With JavaScript, SQL and HTML, I'm able to present the results in form of a simple web application, querying the database connected to the \textit{Node.js} server.
+What is the result? Peek.
+Add the server side described.
+
+Implementation of the thesis topic will by nature involve a containerization software (\textit{here Docker}), which will host several subapplications written as semi-standalone scripts, each responsible for a part of the data pipeline. Using Python and its vast collection of libraries I'm handling the data scraping, intial cleaning and maintenance of the pre-stage database in compressed CSV files; as well as managing the MySQL database, creating helper tables, extracting new information and visualizing the data to answer user's questions. With JavaScript, SQL and HTML, I'm able to present the results in form of a simple web application, querying the database connected to a \textit{Node.js} server.
 
 
 \section{Functional requirements}
+The system is required to do the following:
 \begin{enumerate}
-\item The user should be able to collect data about chosen cards expansion
+\item The system should gather cards, sellers and offers' data and keep it up to date
+\item The system should allow the user to choose an expansion of cards to gather
 \item The data gathering system should run continuously and gather data once a day
 \item The gathering system should visit all card sites from specified expansion and save (a) card information, dynamic and static, and (b) full information about sale offers of this card to CSV files
 \item The gathering system should visit profile pages of all newly-encountered sellers and save their public data to a CSV file
 \item The gathering system should keep track of the date and save the date data into a CSV file
 \item The database manager system should run continuously and update the database whenever new complete batch of data has been gathered
 \item The data miner system should run continuously and create data marts every hour, given the database has the newest data
-\item The web application should run continuously, recovering from fatal errors and providing the user with at least four ways of getting useful information from the data
+\item The web application should run continuously, recovering from errors and providing the user with at least four ways of getting useful information from the data
 \end{enumerate}
 
 
@@ -28,6 +33,7 @@ Implementation of the thesis topic will by nature involve a containerization sof
 
 
 \section{Problem domain}
+The main goal of this project is to optimize user's card buying decisions basing on the data gathered in the warehouse.
 
 \subsection{Trading card games}
 Trading card games (\textit{TCG}), also known as collectible card games (\textit{CCG}), are types of card games combining the elements of strategic gameplay and features of trading cards.
@@ -42,10 +48,10 @@ Each card has a name, expansion, which is a higher-level grouping of cards, and 
 When the data from the card market is collected, it is stored in five CSV files and one text file. The text file, named after set expansion, contains card names in the order of first visit and it's used to maintain consistent card-to-card progression between runs. Then, each CSV file represents one entity: \textit{card}, \textit{seller} (static entities), \textit{card\_stats}, \textit{date} and \textit{sale\_offer} (dynamic entities).
 
 \section{Data warehouse modelling}
-The data warehouse was a focal point of the DWDMS course project. My part (\textit{data-gathering}) has been heavily improved (data compression, using pickle data format to speed up processing, redone services architecture, redone timing, and many more), while the rest has been written again, specifially for this thesis, by the author. The data warehouse lifecycle beings when the data is collected. The pre-stage area encompasses what is written in the CSV files after a data gathering run. The described entities have the following attributes.
+The data warehouse lifecycle beings when the data is collected. The pre-stage area encompasses what is written in the CSV files after a gathering run. These files correspond to entities with the following attributes.
 
-\subsection{Date}
-Stores a date dimension with a resolution of one day.
+\subsection*{Date}
+Stores a date dimension with one day increments.
 \begin{itemize}
 \setlength\itemsep{0.2em}
 \item \textbf{id}: smallint
@@ -55,7 +61,7 @@ Stores a date dimension with a resolution of one day.
 \item weekday: tinyint
 \end{itemize}
 
-\subsection{Card}
+\subsection*{Card}
 Stores the cards' immutable information.
 \begin{itemize}
 \setlength\itemsep{0.2em}
@@ -65,7 +71,7 @@ Stores the cards' immutable information.
 \item rarity: varchar
 \end{itemize}
 
-\subsection{Seller}
+\subsection*{Seller}
 Stores the info on website users with at least one sale offer.
 \begin{itemize}
 \setlength\itemsep{0.2em}
@@ -77,7 +83,7 @@ Stores the info on website users with at least one sale offer.
 \item \textit{address}: varchar
 \end{itemize}
 
-\subsection{Card stats}
+\subsection*{Card stats}
 Stores the date-dependent statistics regarding cards price and availability.
 \begin{itemize}
 \setlength\itemsep{0.2em}
@@ -91,7 +97,7 @@ Stores the date-dependent statistics regarding cards price and availability.
 \item date\_id: smallint
 \end{itemize}
 
-\subsection{Sale offer}
+\subsection*{Sale offer}
 Stores the data on sale offers from each day, including who is selling, what and for how much, card condition and others.
 \begin{itemize}
 \setlength\itemsep{0.2em}
@@ -106,5 +112,7 @@ Stores the data on sale offers from each day, including who is selling, what and
 \item date\_id: smallint
 \end{itemize}
 
-\subsection{Tables in MySQL}
-Initially, after the data is gathered from the website, it is stored in CSV files. Then, the database manager updates an image-based MySQL server running in Docker, creating the tables corresponding to each entity, and data miner adds new tables as data marts for future use, and performs other analyses and visualizations.
+\section{Tables in MySQL}
+After the data is gathered from the website, and stored in the CSV files, the database manager updates an image-based MySQL server running in Docker, creating the tables corresponding to each entity --- and data miner adds new tables as data marts for future use, and performs other analyses and visualizations.
+
+List the new tables + one sentence about them?
