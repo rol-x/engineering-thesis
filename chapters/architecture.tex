@@ -18,7 +18,7 @@ three auto-generating directories with program-related data:
 and a docker-compose.yml file. Each of the four directories has its own Dockerfile, and acts as a build context for that container image. Additionally, two containers are pulled from the Docker image repository, the MySQL server (\textit{mysql/mysql-server}) and Selenium standalone Firefox webdriver (\textit{selenium/standalone-firefox}).
 Figure (\ref{arch:container_dependencies}) shows the dependencies between containers.
 
-\begin{figure}[h!]
+\begin{figure}[ht]
     \centering
     \includegraphics[width=\textwidth]{figures/container_dependencies.png}
     \caption{Boot order of containers (least dependant first)}
@@ -70,7 +70,7 @@ What happens in Docker volumes? What happens in the database?
 What is the end result of the pipeline?
 What is the speed of consecutive steps?
 
-\begin{figure}[h!]
+\begin{figure}[ht]
 \centering
 \includegraphics[width=\textwidth]{figures/warehousing.jpg}
 \caption{Data pipeline from the server (left-top) to results (right-bottom).}

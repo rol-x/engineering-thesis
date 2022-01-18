@@ -57,6 +57,8 @@ The data warehouse lifecycle beings when the data is collected. The pre-stage ar
 \subsection{Base tables}
 After the data is gathered from the website, and stored in the CSV files, the database manager updates an image-based MySQL server running in Docker, creating the tables corresponding to each entity --- and data miner adds new tables as data marts for future use, and performs other analyses and visualizations.
 
+Change this to a diagram:
+
 \subsection*{Date}
 Stores a date dimension with one day increments.
 \begin{itemize}
@@ -130,5 +132,7 @@ The \textit{mysql\_database} container hosts a database with persistent memory, 
 The \textit{data\_gathering} subsystem automatically scrapes and collects the web data in the \textit{data} directory, while \textit{database\_manager} takes this data and passes it to the database. It is important for the \textit{database\_manager} to be slightly delayed with respect to \textit{data\_gathering}, for reasons that are explained in section (\ref{container_orchestration}).
 
 The \textit{data\_miner} and \textit{node\_server} containers are dependent only on the database, however here boot order and system state are not as important; these asynchonous containers perform their job properly when the data is ready and don't cause critial failure when it's not, which is enough for the application to run reliably.
+
+The \textit{node\_server} container hosts a website served by a Node.js server, that presents the user with four functional analyses of the card market.
 
 Each container has its own virtual storage, so to perform tasks on a shared set of data, both docker volumes and data mounts are introduced. Additionally, each container exposes one port internally to a port on the host, inside a network encompassing the whole solution.
