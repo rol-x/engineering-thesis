@@ -49,80 +49,29 @@ Each card has a name, an expansion, which is a higher-level grouping of cards, a
 When the data from the card market is collected, it is stored in five CSV files and one text file. The text file, named after set expansion, contains card names in the order of first visit and it's used to maintain consistent card-to-card progression between runs. Then, each CSV file represents one entity: \textit{card}, \textit{seller} (static entities), \textit{card\_stats}, \textit{date} and \textit{sale\_offer} (dynamic entities).
 
 \subsection{Problem formulation}
-Questions here.
+From the point of view of a card collectioner, every potential buy should be analyzed for better offers in order to minimize losses. The main goals of the user among buying needed cards at the lowest possible price, without sacrificing the various card qualities; finding the most price-slashing, discout-oriented sellers; discovering which cards are more discounted than others, and thus make a better buy opportunity; or minimizing the shipping costs by ordering a whole set of cards from a single seller, should one exist. Therefore, the main questions posed by the user should be answered accordingly:
+\begin{enumerate}
+\item Given a non-empty list of card ids (and card qualities: language, condition, whether it is foiled), find three sellers that sell that card at the lowest price.
+\item Given a non-empty list of card ids (and card qualities) rank them based on price statistics, to highlight the most discounted cards.
+\item Given a non-empty list of card ids (and card qualities) select users selling the maximum amount of wanted cards, ordered by the lowest total price.
+\item Given wanted card qualities, find which sellers have a high amount of discounted cards and the biggest differences between the average market prices and their prices.
+\end{enumerate}
 
 \section{Data warehouse modelling}
 The data warehouse lifecycle beings when the data is collected. The pre-stage area encompasses what is written in the CSV files after a gathering run. These files correspond to entities from subsection (\ref{entities}) and to the tables presented below.
 
 \subsection{Base tables}
-After the data is gathered from the website, and stored in the CSV files, the database manager updates an image-based MySQL server running in Docker, creating the tables corresponding to each entity --- and data miner adds new tables as data marts for future use, and performs other analyses and visualizations.
+After the data is gathered from the website, and stored in the CSV files, the database manager updates an image-based MySQL server running in Docker, creating the tables corresponding to each entity (seen in Fig. \ref{fig:database})--- and data miner adds new tables as data marts for future use, and performs other analyses and visualizations.
 
-Change this to a diagram:
+\begin{figure}[ht]
+\centering
+\includegraphics[width=\textwidth]{figures/database.png}
+\caption{Database schema with the five base tables}
+\label{fig:database}
+\end{figure}
 
-\subsection*{Date}
-Stores a date dimension with one day increments.
-\begin{itemize}
-\setlength\itemsep{0.2em}
-\item \textbf{id}: smallint
-\item day: tinyint
-\item month: tinyint
-\item year: smallint
-\item weekday: tinyint
-\end{itemize}
-
-\subsection*{Card}
-Stores the cards' immutable information.
-\begin{itemize}
-\setlength\itemsep{0.2em}
-\item \textbf{id}: smallint
-\item name: varchar
-\item expansion: varchar
-\item rarity: varchar
-\end{itemize}
-
-\subsection*{Seller}
-Stores the info on website users with at least one sale offer.
-\begin{itemize}
-\setlength\itemsep{0.2em}
-\item \textbf{id}: smallint
-\item name: varchar
-\item type: varchar
-\item member\_since: smallint
-\item country: varchar
-\item \textit{address}: varchar
-\end{itemize}
-
-\subsection*{Card stats}
-Stores the date-dependent statistics regarding cards price and availability.
-\begin{itemize}
-\setlength\itemsep{0.2em}
-\item \textbf{id}: mediumint
-\item card\_id: smallint
-\item price\_from: decimal
-\item monthly\_avg: decimal
-\item weekly\_avg: decimal
-\item daily\_avg: decimal
-\item available\_items: mediumint
-\item date\_id: smallint
-\end{itemize}
-
-\subsection*{Sale offer}
-Stores the data on sale offers from each day, including who is selling, what and for how much, card condition and others.
-\begin{itemize}
-\setlength\itemsep{0.2em}
-\item \textbf{id}: int
-\item seller\_id: smallint
-\item price: decimal
-\item card\_id: smallint
-\item card\_condition: varchar
-\item card\_language: varchar
-\item is\_foiled: tinyint
-\item amount: smallint
-\item date\_id: smallint
-\end{itemize}
-
-\subsection{Helper views}
-List the new tables + one sentence about them?
+\subsection{Helper tables}
+The data miner creates new tables basing on the five elemental ones, in order to speed up the processing of SQL queries. The largest and most problematic table is the \textit{sale\_offer} with few millions of records, eight attributes each. To reduce the loading time, the newest day is selected as a separate table. Similarly, last two weeks are another temporal subset, extraction of which helps with performance.
 
 \section{Containers overview}
 The task of the \textit{firefox\_webdriver} container is to provide a constant and reliable access to a browser-like solution for an automated page navigation.

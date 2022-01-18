@@ -26,13 +26,24 @@ Figure (\ref{arch:container_dependencies}) shows the dependencies between contai
 \end{figure}
 
 \section{Containers}
-Mention docker-compose here, docker software and composing the solution up and down.
+Issuing the \texttt{docker-compose up} command builds each local application image from a respective Dockerfile, and aranges them according to the configuration in docker-compose.yml file. All of the containers are booted to a shared network, with each container's name serving as an alias to be recognized immediately by other connected containers. Thus, every application exposes an internal port to the host via parameter: \par
+\texttt{ports:} \par
+\texttt{\qquad - "3308:3306"} \par
+This notation indicates that port 3308 inside the container maps to port 3306 on the host. Additionally, to persist data between system composition and decomposition, docker volumes and data binds are used: \par
+\texttt{volumes:} \par
+\texttt{\qquad - ./data:/data} \par
+\texttt{\qquad - ./logs:/logs} \par
+\texttt{\qquad - ./flags:/flags} \par
+\texttt{\qquad - pickle\_data:/.pickles} \par
+
+Here, we declare that three directories relative to docker-compose.yml are supposed to be visible from the container's point of view as mounted in root directory. Any change to files inside the container will be immediately seen from the host level, providing the ability for several containers to work on a shared set of data. The pickles directory, on the other hand, is mapped to a \textit{named Docker volume}, that is virtual space managed by the containerization software. These volumes are persistent and very fast, but there is no way to peek at their contents. Only the running container can acccess the data there, therefore it acts perfectly as a space for files that should only be accessed by given container. \par
+All of the containers also restart automatically on failure and share a set timezone. To stop the operation of the system, one can stop the app in Docker Desktop, or stop any of the containers, or delete them altogether. However, images created during the build will still exist, so to fully remove the app one can issue a command \texttt{docker-compose down --rmi local -v}, which stops and removes all containers, removes all local images, networks and volumes.
 
 \subsection{Container: \textit{firefox\_webdriver}}
-This container is to provide a constant and reliable access to a browser-like solution for automated page navigation.
+The \textit{firefox\_webdriver} container exposes port 4444 to send the traffic to the server through. It has no persistent memory and in general behaves like an abstract version of a Firefox browser running in the background, operated by any script that connects to it.
 
 \subsection{Container: \textit{mysql\_database}}
-This container hosts a database with persistent memory, storing the major part of the data warehouse and making it accessible to other containers.
+Container \textit{mysql\_database} exposes hosts a database with persistent memory, storing the major part of the data warehouse and making it accessible to other containers.
 
 \subsection{Container: \textit{data\_gathering}}
 This subsystem automatically collects the web-scraped data in the \textit{data} directory
