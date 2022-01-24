@@ -1,35 +1,55 @@
 \chapter{Data gathering implementation}
 \label{ch:gathering}
-What is implemented in this subproject, so that it fulfills its purpose?
-What does the program do? Step by step.
+As mentioned before in this thesis, the \textit{data\_gathering} container consists of a Python project, which main function is to collect card market data. Static data is acquired once, dynamic data daily, and the validity of the data is ensured after every run. The user can alter the program's operation by changing values in the configuration file, and the responses are provided in console and log files. The core part of the implementation in contained in \textit{web} and \textit{data} services. After this container completes its objective, the CSV files in data directory are updated with the newest information available, and their checksum is calculated to be retained as a marker for the verified dataset.
 
 
 \section{Program configuration}
-What is in config.py file?
-Which values are shared among containers?
-Which are modifiable and which are not?
+The configurable global variables are stored in file \textit{config.py}. There are three subgroups inside:
 
+\begin{enumerate}
+    \item Variables for user custom program configuration. \par
+          \texttt{START\_FROM = 1\\ FORCE\_UPDATE = False\\ EXPANSION\_NAME = `Battlebond'} \par
+          The user may want to renew the daily data when suspecting incompleteness or start the operation from a specific card id (for example, starting from 128 when the previous run crashed after card 127). Moreover, the user is provided with the ability to change the expansion, so that efectively all cards from the game could be gathered.
+    \item Variables connected to a single run of code. \par
+          \texttt{DATE\_ID = 0\\ MAIN\_LOGNAME = `other\_main.log'\\ RUN\_LOGNAME = `other\_run.log'} \par
+          These values are determined at the start of the run (whenever a new date has been detected). Log filenames are unique to the run and are used by the logging service. Shared date id is crucial for all operations of the program.
+    \item Fixed variables. \par
+          \texttt{CONTAINER\_DELAY = 10\\ NAME = `data-gathering'\\ BASE\_URL = `https://www.cardmarket.com/en/Magic/Products/Singles/'\\ USERS\_URL = `https://www.cardmarket.com/en/Magic/Users/'\\ WEBDRIVER\_HOSTNAME = `firefox\_webdriver'\\ HEADERS = \textbraceleft"date": \textbraceleft"id": "int", "day": "int", \dots\textbraceright, "card": \dots\textbraceright} \par
+          Fixed variables are used for internal program logic. They are aggregated in a single file to be changed with convenience and to be available wherever needed by importing the file. They set up the website's paths, connection details and information about entities columns and data types.
+\end{enumerate}
 
 \section{Used services}
-What is my service? (What is a service?)
-Why do I use modules as services?
-Why don't I use objective programming?
-What is the purpose of each of the services in this subproject?
+The program uses four services:
+\begin{itemize}
+    \item \textit{Web service}.
+          Responsible for handling the connection to the remote webdriver in another container. It serves as an interface for acquiring the cards' names from specified expansion; loading card and seller pages; clicking the \textit{Load more} button to expand the page fully; getting website's source code in form of a Beautiful Soup object; cooling the connection down to prevent HTML response status 429\footnote{Too  Many Requests --- The user has sent too many requests in a given amount of time ("rate limiting").}; and verifying the completeness of loaded pages.
 
-\subsection{Web service}
-What is this service all about?
+    \item \textit{Data service}.
+          This biggest singular service (over 700 lines of code) utilizes the \textit{Pandas} library to take apart soup objects and transform the information they hold into data records in csv files. This module also provides quasi-database-like functionalities, like finding card's id by its name or checking whether a particular sellers or card statistics are already saved. Here one can also find the use of \textit{pickle} data format, which is astonishingly fast in comparison with other data extensions, as well as the logic responsible for pickling, unpickling, updating and verifying the data.
+
+    \item \textit{Flags service}.
+          The main use for this service in \textit{data\_gathering} container is to signal whenever a dataset has been checked (collected data is tested against various inconsistencies, for example the number of card statistics from each day should equal the number of cards, etc). When the data appears to be complete, the checksum of the entire data directory is calculated and saved in a shared file, for the next stages of the data pipeline to access and confront the datasets against.
+
+    \item \textit{Logs service}.
+          This simple service is a wrapper for the print command. It uses the current time and values from the configuration file to display the state of the program in the console and generated log file. Each container generates a log subdirectory for its own purpose.
+\end{itemize}
+
+Why do I use modules as services? Why don't I use objective programming?
 
 
 \section{Local directories}
-How are they setup, what will they contain?
-
+The container is given access to three host directories via bind mounts: \textbf{data}, where the csv files are stores; \textbf{logs}, with data-gathering subdirectory filled with daily and run-level logs; and \textbf{flags}, containing SHA-1 formatted file with a list of checksums of verified datasets. \par
+There is also a docker volume named \textit{pickle\_data}, which maps to a folder named \textbf{.pickles} in the container root directory. This space is a storage for the data in pickle format, used only by that container during a gathering run.
 
 \section{Run scheduling}
-How is the run scheduled?
-Does it keep trying when faced with exceptions?
+The program begins by booting the directories up if they don't exist and determining the current date. If it's not added to \textit{date.csv}, new entry in the file is generated and its date id is returned. Otherwise, just the date id is retrieved from an existing date. Then, the execution is halted inside a scheduling loop, until the conditions for running the gathering procedure are met. \par \noindent
+\texttt{\# Setup \\ logs.setup\_logs() \\ data.setup\_data() \\ flags.setup\_flags() \\ data.add\_date() \\ \\ \# Time the program execution \\ data.schedule\_the\_run()}
 
+First, the run scheduling function checks whether the \texttt{config.FORCE\_UPDATE} flag is set or whether it's a first gathering run in the environment, which results in immediate return of control to the main function. \par
+If that's not the case, the data directory checksum gets calculated and compared to the validated hashes. In case of occurence in the control file, the program sleeps for 60 minutes, as current data has been validated to be complete. When there is no entry in the \textit{validated\_checksums.sha1} file, the program checks whether today's data is complete. If not, the operation proceedes to gather the data, otherwise it saves the checksum as verified and waits 60 minutes. Every time after sleeping, the date is checked and date id is chosen accordingly.
 
 \section{Data pickling and validation}
+Initially the data was stored in raw csv files, with each new entry being appended to the end as text. This approach proved to be conceptually simple, but not very scalable, as it yielded higher and higher wait times for opening and closing files with hundreds of thousands of rows. Currently, the \textit{sale\_offer.csv} file stores roughly 10 million rows of data, but the total waiting time for opening, reading, writing and closing is greatly reduced. This is done by using the pickle data format with very fast r/w speed. Between the runs, data is kept in gzip-compressed csv format, to ensure minimal disk usage. However, as the run begins, some of the files are read into dataframes and converted to an intermediate \textit{.pkl} files. Then, whenever a pickled entity is needed, the program knows to read the pickle file instead, which loads about 100 times faster. When the program is finished, the pickled entities are transformed back to csv format. This step is the biggest hazard of potential data loss, as hours of computation kept in few, hidden files replace the previous data in a matter of minutes. \\
 What are the formats of the data? Why is csv compressed?
 What are pickles for? What were the obstacles (dictionary fiasco)?
 
