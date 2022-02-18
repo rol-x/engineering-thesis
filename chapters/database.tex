@@ -1,65 +1,76 @@
 \chapter{Database management and data mining}
+
 \label{ch:database}
-Up to this point, our data was stored in the \textit{data} directory and temporary pickle directory. The database managing container takes this data, ensures consistency, and uploads it to the MySQL database.
+Up to this point, our data was stored in the \textit{data} directory in CSV format. The role of the database managing container is to take this data, ensure its correctness, and upload it to a MySQL database. MySQL was chosen because of relative simplicity paired with decent scalability. Additionaly, the only library used in relation to the database is \textit{mysql-connector-python}. \par
+A database is introduced because although having the data stored securly in compressed files on the host filesystem may seem good, we would like to be able to use the data to gain information in the problem domain. Having created the tables in our database, we can use SQL to retrieve information from them; and powerful, multi-stage queries may provide unexpectedly novel knowledge from simple entities. \par
+A data warehouse is a subject-oriented, integrated, time-variant, and nonvolatile collection of data in support of management's decision-making process \cite{dataWarehouseMining}. In order to be congruent to the definition above, presented system must generate a collection of data that is:
 
-How is the data stored so far? How it can be stored?
-Why use database? What kinds of engines we can use?
-What does the data warehouse contain? What is its purpose?
+\begin{enumerate}
+    \item subject-oriented --- related to questions in a single problem domain, e.g. gathering vending statistics and product information in supermarkets to improve sales through better advertising.
+    \item integrated --- combined from possibly several sources into a single, uniform warehouse, which can be accessed by any department within the organization, and the data is ready to be structured into spreadsheets or tables.
+    \item time-variant --- contained and consistent within a time period; when loaded daily, weekly, or hourly does not change within that period.
+    \item nonvolatile --- locked from changes to the gathered data, which once entered into the warehouse, does not change.
+\end{enumerate}
+
+\section{Database managing}
+
+The role of managing the connected database with regards to updating the data falls to the \textit{database\_manager} container. It's internal structure and configuration is similar to the \textit{data\_gathering} container, described in chapter (\ref{ch:gathering}).
+
+\subsection{Program configuration}
+The configurable global variables are stored in file \textit{config.py}. There are three subgroups inside:
+
+\begin{enumerate}
+    \item Variables connected to a single run of the code. \par
+          Database connector and MySQL connection configuration is stored here, together with names of log files and the checksum of data directory.
+    \item Fixed variables. \par
+          \texttt{CONTAINER\_DELAY = 30 \\ NAME = 'database-manager'}
+    \item SQL static queries. \par
+          This section has two variables: \texttt{DROP} and \texttt{CREATE} which are dictionaries holding pairs of table names and appropriate SQL queries to drop and create them.
+\end{enumerate}
 
 
-\section{Program configuration}
-What is in config.py file? Which values are shared among containers? Which are
-modifiable and which are not?
+\subsection{Used services}
+The program, similar to data-gathering program, uses four services, three of which are shared among both of them with minor changes.
+
+\begin{itemize}
+    \item \textit{Database service}.
+          Responsible for handling the connection to the database. It provides access to the data, as well as functions responsible for updating the tables.
+
+    \item \textit{Data service}.
+          Here the service is 53 lines long, with functions detecting the presence of flags file, isolating the data into a Docker volume, loading SQL entities into a Dataframe, and decompressing the CSV files into a container directory from which MySQL can load all records simultaneously.
+
+    \item \textit{Flags service}.
+          This service provides the utility for managing datasets versions across containers; here we use it to check whether current dataset is indeed complete (in \textit{validated-checksums.sha1}), then to see whether it differs from the one that is currently in the database (\textit{database-checksum.sha1}). If it detects a disparity, the new data will be loaded, and its checksum saved to the latter file.
+
+    \item \textit{Logs service}.
+          The use of this service is the same as described in the analogous section (\ref{s:used_services}) in the previous chapter.
+\end{itemize}
 
 
-\section{Used services}
+\subsection{Run scheduling}
+After the initial setup, the program enters a control loop deciding whtether to commence an update or not. First, it compares the checksums of local files and database content. If the newest data is already in the database, the program sleeps for 30 minutes. Otherwise, try to verify this new data by checking against the \textit{validated-checksums.sha1} file. Every time the dataset is concluded to be new, but not yet verified, the program waits 15 minutes.
+
+\subsection{Tables from the staging area}
+When the data is gathered by the first container, it holds information about five entities: \textit{date, card, seller, card\_stats} and \textit{sale\_offer}. The data types of their attributes are dictated by the type of information they convey and are defined as described in subsection (\ref{ss:base_tables}). \par
+In order to upload the data to the database, uncompressed CSV files are copied to \textit{/var/lib/mysql-files} directory inside the container. This allows for the \texttt{LOAD FILE} query to be executed, drastically improving the processing speed.
+
+
+\section{Data mining}
+When the data is in the database, it can be used to gain insights about issues that concern us. Large tables can be reduced if the historical data is not needed every time, e.g. the \textit{sale\_offers} table, having 90 thousand new records every day and over 10 million overall, can be used to extract just the last two weeks of sales. This two-week time period information is needed by other queries and creating such a sliced table improves the access time greatly. The other increase in speed comes from a similar table, where only the sale offers from the current day are stored. \par
+The data is also read into the mining module and transformed into Dataframes, table-like objects provided by the \textit{pandas} library. These provide a multitude of transformations and method to be applied to the data, which the author uses to extract valuable information about the problem domain.
+
+
+\subsection{Program configuration}
+The config.py file holds
+
+
+\subsection{Used services}
 What modules are used in the subproject?
 What are the differences in the services?
 
-\subsection{Database service}
-What does it do, and how does it do it?
-
-
-\section{Run scheduling}
+\subsection{Run scheduling}
 How is the run scheduled? What indicators are present?
 
-
-\section{Tables from staging area}
-How do the tables look like when the data is gathered by the first container?
-What are the data types?
-What data can be missing or faulty?
-Do we have any metadata? How can it be used?
-
-
-\section{Data transformation}
-How will the data be transformed?
-What new tables will be created?
-How will these tables be utilized?
-
-What information is ready to be read right away?
-What questions can be answered immediately?
-What questions are more complex?
-What data can be predicted from the current data?
-
-
-\section{Program configuration}
-What is in config.py file?
-Which values are shared among containers?
-Which are modifiable and which are not?
-
-
-\section{Used services}
-What modules are used in the subproject?
-What are the differences in the services?
-
-\subsection{Mining service}
-What does it do, and how does it do it?
-
-
-\section{Run scheduling}
-How is the run scheduled? What indicators are present?
-
-
-\section{Feature extraction}
+\subsection{Feature extraction}
 What new features can be discovered?
 \url{https://www.analyticsvidhya.com/blog/2021/04/guide-for-feature-extraction-techniques/}

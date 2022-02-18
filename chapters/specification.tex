@@ -1,34 +1,45 @@
 \chapter{Specification}
 \label{ch:specification}
-What is the actual example that I'm using? Describe the specification from the outside (helicopter view).
+The presented system requests pages from card market website and scrapes their content to build a knowledge database helping the user take better decisions as a buyer. The results are presented in a form of a simple web application, as presented on Fig. \ref{fig:web_app} and \ref{fig:web_app_best_set_seller}, as well as in the form of graphs and plots in the \textit{analysis} directory.
 
-What is the result? Peek.
-Add the server side described.
+\begin{figure}
+    \centering
+    \includegraphics[width=\textwidth]{figures/web_app.png}
+    \caption{Simple web interface for performing analysis}
+    \label{fig:web_app}
+\end{figure}
 
-Implementation of the thesis topic will by nature involve a containerization software (\textit{here Docker}), which will host several subapplications written as semi-standalone scripts, each responsible for a part of the data pipeline. Using Python and its vast collection of libraries I'm handling the data scraping, intial cleaning and maintenance of the pre-stage database in compressed CSV files; as well as managing the MySQL database, creating helper tables, extracting new information and visualizing the data to answer user's questions. With JavaScript, SQL and HTML, I'm able to present the results in form of a simple web application, querying the database connected to a \textit{Node.js} server.
+\begin{figure}
+    \centering
+    \includegraphics[width=\textwidth]{figures/web_app_best_set_seller.png}
+    \caption{Searching for the user selling a batch of cards with given conditions}
+    \label{fig:web_app_best_set_seller}
+\end{figure}
+
+Implementation of the thesis topic involves a containerization software --- \textit{Docker} --- which hosts several subapplications written as semi-standalone scripts, each responsible for a part of the data pipeline. Using Python and its vast collection of libraries the author is handling the data scraping, intial cleaning and maintenance of the pre-stage database in compressed CSV files; as well as managing the MySQL database, creating helper tables, extracting new information and visualizing the data to answer user's questions. With JavaScript, SQL and HTML the web application is querying the database connected to a \textit{Node.js} server.
 
 
 \section{Functional requirements}
 The system is required to do the following:
 \begin{enumerate}
-\item The system should gather cards, sellers and offers' data and keep it up to date
-\item The system should allow the user to choose an expansion of cards to gather
-\item The data gathering system should run continuously and gather data once a day
-\item The gathering system should visit all card sites from specified expansion and save (a) card information, dynamic and static, and (b) full information about sale offers of this card to CSV files
-\item The gathering system should visit profile pages of all newly-encountered sellers and save their public data to a CSV file
-\item The gathering system should keep track of the date and save the date data into a CSV file
-\item The database manager system should run continuously and update the database whenever new complete batch of data has been gathered
-\item The data miner system should run continuously and create data marts every hour, given the database has the newest data
-\item The web application should run continuously, recovering from errors and providing the user with at least four ways of getting useful information from the data
+    \item The system should gather cards, sellers and offers' data and keep it up to date
+    \item The system should allow the user to choose an expansion of cards to gather
+    \item The data gathering system should run continuously and gather data once a day
+    \item The gathering system should visit all card sites from specified expansion and save (a) card information, dynamic and static, and (b) full information about sale offers of this card to CSV files
+    \item The gathering system should visit profile pages of all newly-encountered sellers and save their public data to a CSV file
+    \item The gathering system should keep track of the date and save the date data into a CSV file
+    \item The database manager system should run continuously and update the database whenever new complete batch of data has been gathered
+    \item The data miner system should run continuously and create data marts every hour, given the database has the newest data
+    \item The web application should run continuously, recovering from errors and providing the user with at least four ways of getting useful information from the data
 \end{enumerate}
 
 
 \section{Non-functional requirements}
 \begin{enumerate}
-\item The total time of data processing should be less than 6 hours
-\item The system should be standalone (bootstrapping itself from \textit{docker-compose.yml} and code), and cross-platform compatible
-\item The gathering system should adapt the requests frequency to the server condition
-\item No user input is required after running the system
+    \item The total time of data processing should be less than 6 hours
+    \item The system should be standalone (bootstrapping itself from \textit{docker-compose.yml} and code), and cross-platform compatible
+    \item The gathering system should adapt the requests frequency to the server condition
+    \item No user input is required after running the system
 \end{enumerate}
 
 
@@ -51,23 +62,25 @@ When the data from the card market is collected, it is stored in five CSV files 
 \subsection{Problem formulation}
 From the point of view of a card collectioner, every potential buy should be analyzed for better offers in order to minimize losses. The main goals of the user among buying needed cards at the lowest possible price, without sacrificing the various card qualities; finding the most price-slashing, discout-oriented sellers; discovering which cards are more discounted than others, and thus make a better buy opportunity; or minimizing the shipping costs by ordering a whole set of cards from a single seller, should one exist. Therefore, the main questions posed by the user should be answered accordingly:
 \begin{enumerate}
-\item Given a non-empty list of card ids (and card qualities: language, condition, whether it is foiled), find three sellers that sell that card at the lowest price.
-\item Given a non-empty list of card ids (and card qualities) rank them based on price statistics, to highlight the most discounted cards.
-\item Given a non-empty list of card ids (and card qualities) select users selling the maximum amount of wanted cards, ordered by the lowest total price.
-\item Given wanted card qualities, find which sellers have a high amount of discounted cards and the biggest differences between the average market prices and their prices.
+    \item Given a non-empty list of card ids (and card qualities: language, condition, whether it is foiled), find three sellers that sell that card at the lowest price.
+    \item Given a non-empty list of card ids (and card qualities) rank them based on price statistics, to highlight the most discounted cards.
+    \item Given a non-empty list of card ids (and card qualities) select users selling the maximum amount of wanted cards, ordered by the lowest total price.
+    \item Given wanted card qualities, find which sellers have a high amount of discounted cards and the biggest differences between the average market prices and their prices.
+    \item Additionally, present as much novel information and insights from the data as possible.
 \end{enumerate}
 
 \section{Data warehouse modelling}
 The data warehouse lifecycle beings when the data is collected. The pre-stage area encompasses what is written in the CSV files after a gathering run. These files correspond to entities from subsection (\ref{entities}) and to the tables presented below.
 
 \subsection{Base tables}
+\label{ss:base_tables}
 After the data is gathered from the website, and stored in the CSV files, the database manager updates an image-based MySQL server running in Docker, creating the tables corresponding to each entity (seen in Fig. \ref{fig:database})--- and data miner adds new tables as data marts for future use, and performs other analyses and visualizations.
 
 \begin{figure}[ht]
-\centering
-\includegraphics[width=\textwidth]{figures/database.png}
-\caption{Database schema with the five base tables}
-\label{fig:database}
+    \centering
+    \includegraphics[width=\textwidth]{figures/database.png}
+    \caption{Database schema with the five base tables}
+    \label{fig:database}
 \end{figure}
 
 \subsection{Helper tables}

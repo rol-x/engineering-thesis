@@ -9,11 +9,7 @@ In the contemporary world, the Internet facilitates the backbone of world-wide s
 
 
 \section{Data on the internet}
-What is the history of internet?
-What is the state of the internet today?
-How good is the average bandwidth?
-How are machines communicating with each other and to what means?
-Instant availability of information is only practical for computers, need to automate the gathering and analysis of data. Enter web scraping.
+When the Internet (or the ``network of networks'') emerged in the United States in the 1970s it did cause a stir in the media, as it wasn't visible by the public until the 1990s. Today, more than 4.5 billion people are estimated to have access to the Internet. Not long after the Internet bubble burst in 2001\footnote{Speculation related to providing any services online, just to gain revenue from advertising on the Internet.} came ``Web 2.0'', a technological concept that put emphasis on social networks and user-generated content. Social media (Facebook, Twitter, and Instagram) gain on popularity and more websites are created every day. Since mobile phones can go online as well, the number of Internet users worldwide exploded from about one sixth of the world population in 2005 to more than half in 2020. At the same time, tools to extract data from the Internet are being constantly developed and outperformed by better new tools and approaches. This practically instant availability of any kind of information is practical for computers more than for humans, especially if they're guided to perform complex analysis and present the results in a simple way, bridging the gap between information chaos and clarity.
 
 
 \section{Python language}
@@ -56,5 +52,5 @@ In my project I gather the data from various pages on the card market website, t
 
 
 \section{Justification of the thesis topic}
-How do I use existing technology to solve an existing problem?
-What questions do I aim to answer?
+In this thesis the author uses and draws from the technology described above, in order to build a coherent and standalone system, responsible for automatic data warehouse management. The theme of the warehouse is trading cards market and problems related to performing the right decisions as a buyer. \par
+The cards market information is acquired using Selenium framework, all of the data processing is done in Python, with MySQL database to store the results and helper tables for further analysis. Data warehousing systems, with their multistage data processing, make it possible to isolate independent processes using containers. With each step running as a separate asynchonous application, the data flow is clear and easily handled; and failure of one container doesn't affect the others and its effect on the pipeline is minimized. Additionally, the proposed topic mirrors the author's interests in data processing and analysis, web scraping and containerization.

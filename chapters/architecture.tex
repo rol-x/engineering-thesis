@@ -74,21 +74,23 @@ The three programs written in Python share similar functions. These are grouped 
 \end{itemize}
 
 \section{Data pipeline}
-High level overview of the data pipeline (schema).
-Where does the data come from? How do I get it?
-Where do I validate it? What happens in the directories?
-What happens in Docker volumes? What happens in the database?
-What is the end result of the pipeline?
-What is the speed of consecutive steps?
+As presented on Fig. \ref{fig:pipeline}, the data comes from the web market servers and, through Selenium, is gathered and processed into five CSV files, with intermediate files in pickle format, inside the container. Then, the directory is cloned and the entities from files are uploaded to the database. New data is generated from the base five tables and exploratory data analysis is performed. The end results include the \textit{analysis} directory with graphs and plots, and the web application providing four analyses on the data.
+The speed of the consecutive steps were measured from the logs and were found to be as follows:
 
-\begin{figure}[ht]
+\begin{figure}
 \centering
 \includegraphics[width=\textwidth]{figures/warehousing.jpg}
 \caption{Data pipeline from the server (left-top) to results (right-bottom).}
+\label{fig:pipeline}
 \end{figure}
+
+\begin{itemize}
+    \item Scraping the website data: around 1--2 hours when all sellers are saved, otherwise more than 6 hours
+    \item Validating the data: around 1 minute
+    \item Updating the database: around 5 minutes
+    \item Creating helper tables and analysis: around 1 minute
+\end{itemize}
 
 
 \section{Compatilibity}
-Is my project compatible with main operating systems?
-How does the installation differ on various systems?
-
+The project is built with the intent of running on different operating systems without problems and extensive setup. This is possible due to containerization, which provides an own micro-system for each application, isolating the core of the program from the host system. On the results of running the application of Fedora 35, reference section (\ref{s:testing}).

@@ -19,6 +19,7 @@ The configurable global variables are stored in file \textit{config.py}. There a
 \end{enumerate}
 
 \section{Used services}
+\label{s:used_services}
 The program uses four services:
 \begin{itemize}
       \item \textit{Web service}.
@@ -34,7 +35,7 @@ The program uses four services:
             This simple service is a wrapper for the print command. It uses the current time and values from the configuration file to display the state of the program in the console and generated log file. Each container generates a log subdirectory for its own purpose.
 \end{itemize}
 
-Why do I use modules as services? Why don't I use objective programming?
+To keep the operation of the program simple and fast the author decided to prefer modular programming over object-oriented programming. OOP approach would probably yield some simplicity with methods related to the entities (e.g. \textit{Card} class, with scraping the data, importing, exporting and updating inside the class body as methods), but it would entail sharing the class among containers, which would require all of the containers to have the same external libraries installed, which would reduce their build time and performance. Using functions on module-levels, with separation of resposibility between modules ensures minimal redundancy in importing external libraries, as well as provides fast and readable code.
 
 
 \section{Local directories}
