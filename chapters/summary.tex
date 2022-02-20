@@ -23,36 +23,8 @@ Non-functional requirements were concerned with \textit{how} does the system beh
 
 Overall, six containers were used, four of which were sub-projects acting on the data (data gathering, database managing, data mining, website serving). Additionally, a Sematext monitoring software was used to observe the performance of the system, which amounted to additional \textit{sematext\_agent} container, reporting execution details to the dashboard.
 
-\section{Containers performance}
-Using the free version of Sematext monitoring agent, the author was able to track the performance of the system, mainly the MySQL database. \par
-In Fig. \ref{fig:mysql_network} we can see the amount of data received and transmitted by the database. The steady hourly level represents the data mining module, which connects to the database every 60 minutes to perform the analysis. Spikes around 1:00 am correspond to the database manager updating the tables with new data gathered from this day. \par
-Fig. \ref{fig:mysql_performance} shows the load of the database. We can see the correlation between the Selects Rate and CPU and Memory load. Around 4 GB of memory are used, with additional 2--3 GB chached and buffered. \par
-The last figure juxtaposes the number of tables dropped with tables created (Fig. \ref{fig:mysql_create_drop}). Due to the architecture of the system, each table is replaced by its new version, meaning every \texttt{CREATE} is paired with a \texttt{DROP}, which is reflected in the presented chart.
-
-\begin{figure}
-    \centering
-    \includegraphics[width=\textwidth]{figures/mysql_network.png}
-    \caption{}
-    \label{fig:mysql_network}
-\end{figure}
-
-\begin{figure}
-    \centering
-    \includegraphics[width=\textwidth]{figures/mysql_performance.png}
-    \caption{}
-    \label{fig:mysql_performance}
-\end{figure}
-
-\begin{figure}
-    \centering
-    \includegraphics[width=\textwidth]{figures/mysql_create_drop.png}
-    \caption{}
-    \label{fig:mysql_create_drop}
-\end{figure}
-
-
 \section{Scaling and customizability}
 The system was build with the idea of scalability from the very beginning. The number of gathered data can be extended to years, as long as the largest table can be loaded into a single dataframe without running out of memory. Interestingly, if the data gathering part was swapped with other code for data acquisition, the data warehouse could instead be focused around the new theme and still work with few minor changes to the other containers. One may want to choose another website, and if the information provided there is sufficient to create the same entities in CSV files, there would be no changes needed for the rest of the data pipeline to work correctly. Moreover, the usage of containers (which can be asynchonously stopped and started) suggests a version of the system with multiple versions of each container, each still doing their core task, but with differences. Such modular approach is seen more and more in the world of mordern technology and would be perfectly applicable here. Additionally, the acquired data can be used in a myriad of different ways besides those presented in this paper. The created data warehouse is simple, but proves to be a powerful tool, which usefulness can be extended far with the right approach and broad imagination.
 
 \section{Conclusions}
-In conclusion, the created project is a successfully working solution. It performes the totality of given tasks, works relatively fast, uses verbose logging and it set up to be resilient and easy to use. The data warehouse model fits well with the purpose of the program and containers allow to isolate the steps on the data pipeline, as well as transport the solution to any system and run it there. The results are calculated fast and often, and the web application provides answers to questions, which can substantially contribute to the user making a better market choice. Using the available technology the author was able to transform large, disseminated pieces of information into centralized and uniform data, to then extract insights in a matter of seconds, whereas the market research would have taken days, if not weeks, spent on browing the service websites. This sufficiently proves the real usefulness of today's technology and the advantage in hands of those who use it well. However, if data is the sword of the 21st century, one must always be cautious not to get cut; issues with big data are challanges many of the biggest companies face today, and the ethics of discovering knowledge about people, which even they do not have, opens a whole new Pandora's box of moral dilemmas. Just like the technology promising improvement in our lifestyles, data is a double-edged sword. It's giving us an advantage, but is also placing a great burden of responsibility --- a burden, which has to be carried to the end once the lid is opened.
+In conclusion, the created project is a successfully working solution. It performes the totality of given tasks, works relatively fast, uses verbose logging and it set up to be resilient and easy to use. The data warehouse model fits well with the purpose of the program and containers allow to isolate the steps on the data pipeline, as well as transport the solution to any system and run it there. The results are calculated fast and often, and the web application provides answers to questions, which can substantially contribute to the user making a better market choice. Using the available technology the author was able to transform large, disseminated pieces of information into centralized and uniform data, to then extract insights in a matter of seconds, whereas the market research would have taken days, if not weeks, spent on browsing the service websites. This sufficiently proves the real usefulness of today's technology and the advantage in hands of those who use it well. However, if data is the sword of the 21st century, one must always be cautious not to get cut; issues with big data are challanges many of the biggest companies face today, and the ethics of discovering knowledge about people, which even they do not have, opens a whole new Pandora's box of moral dilemmas. Just like the technology promising improvement in our lifestyles, data is a double-edged sword. It's giving us an advantage, but is also placing a great burden of responsibility --- a burden, which has to be carried to the end once the lid is opened.

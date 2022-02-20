@@ -38,7 +38,7 @@ The data gathered, cleaned and stored in the previous parts of this project is n
 \end{figure}
 
 \section{Data analysis}
-The end results of the data analysis are plots in the \textit{analysis} directory. Figures \ref{fig:available_items} and \ref{fig:price_chart} show the number of sale offers and price trends versus time, respectively. Another example is the site's popularity presented via the number of new sellers per year (Fig. \ref{fig:site_popularity}). \par
+The end results of the data analysis are plots saved in the \textit{analysis} directory. Various combinations of dataframe methods from the \textit{pandas} library are used to obtain interesting conclusions from the tables. Figure \ref{fig:available_items} shows the total number of items available for sale, registered each day since the end of September 2021. We can see a significant drop around December and January, which could be caused by the winter holidays and New Year's Eve, similar to a \textit{year-end freeze} --- a period encompassing a dozen days before and few after the end of the year, when no significant changes are made within an organization. From mid-January the number of items is back to the level from mid-December. Another chart (Fig. \ref{fig:price_chart}) presents the price statistics averaged from all cards. The moving averages (monthly and weekly) naturally have less fluctuations then the daily price. What is interesting is the observation of steady rise in value; this effect may be contributed to the economic situation related to the post-pandemic strains on various industries and a rise in inflation. The average price of all cards rised from less than \texteuro1.80 in October 2021 to over \texteuro1.95 in February 2022, which amounts to around 10\% increase over the span of five months. One can also speculate that the drop in supply around the New Year's Eve resulted in its own rise in cards' value, signified by a bump in the weekly average at the beginning of January 2022. Another example is the measure of the site's popularity, calculated via the number of new sellers per year (Fig. \ref{fig:site_popularity}). These plots would indicate that the site had its most successful years from 2017 to 2019, and sellers from before 2012 are the site's veterans. \par
 
 \begin{figure}
     \centering
@@ -61,19 +61,20 @@ The end results of the data analysis are plots in the \textit{analysis} director
     \label{fig:site_popularity}
 \end{figure}
 
-As part of the analysis, scatterplots of best cards' prices are generated for each card individually. This help the user understand the price trends of the card by analyzing when did the top ten, thirty and fifty best deals occured, and what was the price. This way, without using any machine learning algorithms, we can provide a simple functionality for predicting the cards next \textit{good deal} which happens inside the user's brain. For example, looking at Fig. \ref{fig:card_12} and \ref{fig:card_21} we conclude that one of the cards will probably be soon available at around \texteuro2.30, while the other is clearly rising in value and a price under \texteuro11.00 is not likely to occur anytime soon.
+As another part of the analysis, scatterplots of best cards' prices are generated for each card individually. These help the user understand the price trends of the wanted card, by analyzing when did the top ten, thirty and fifty best deals occured, and what was the price. This way, we can provide a simple functionality for predicting the cards next \textit{good deal} without using any machine learning algorithms, but rather forcing the user's brain to intuitively continue the data into the future. For example, looking at Fig. \ref{fig:card_12} and \ref{fig:card_21} we conclude that one of the cards will probably be soon available at around \texteuro2.30, while the other is clearly rising in value and a price under \texteuro11.00 is not likely to occur anytime soon. Only the cheapest offers are taken into account, as we want to analyze the trend of the lower boundary, not the mean --- the amounts of 50, 30 and 10 were chosen with a trial-and-error approach, until the graph would become clear, information-rich, and not overwhelming. \par
+More plots are available in the \textit{analysis} directory.
 
 \begin{figure}
     \centering
     \includegraphics[width=\textwidth]{figures/card_12.jpg}
-    \caption{Card 12: best historical prices}
+    \caption{Card 12. Best 50, 30 and 10 historical prices (blue, orange, green, respectively)}
     \label{fig:card_12}
 \end{figure}
 
 \begin{figure}
     \centering
     \includegraphics[width=\textwidth]{figures/card_21.jpg}
-    \caption{Card 21: best historical prices}
+    \caption{Card 21. Best 50, 30 and 10 historical prices (blue, orange, green, respectively)}
     \label{fig:card_21}
 \end{figure}
 
@@ -117,16 +118,44 @@ The program is able to behave accordingly in unexpected conditions, as presented
 
 \begin{figure}
     \centering
-    \includegraphics[width=\textwidth]{figures/exception_handling.png}
-    \caption{Handling an exception during the initial stages of gathering run}
-    \label{fig:exception_handling}
+    \includegraphics[width=\textwidth]{figures/unknown_seller.png}
+    \caption{Handling invalid datasets --- running to complete a list of sellers wrt. sale offers}
+    \label{fig:unknown_seller}
 \end{figure}
 
 \begin{figure}
     \centering
-    \includegraphics[width=\textwidth]{figures/unknown_seller.png}
-    \caption{Handling invalid datasets --- running to complete a list of sellers wrt. sale offers}
-    \label{fig:unknown_seller}
+    \includegraphics[width=0.875\textwidth]{figures/exception_handling.png}
+    \caption{Handling an exception during the initial stages of gathering run}
+    \label{fig:exception_handling}
+\end{figure}
+
+
+\section{Containers performance}
+Using the free version of Sematext monitoring agent, the author was able to track the performance of the system, mainly the MySQL database. \par
+In Fig. \ref{fig:mysql_network} we can see the amount of data received and transmitted by the database. The steady hourly level represents the data mining module, which connects to the database every 60 minutes to perform the analysis. Spikes around 1:00 am correspond to the database manager updating the tables with new data gathered from this day. \par
+Fig. \ref{fig:mysql_performance} shows the load of the database. We can see the correlation between the Selects Rate and CPU and Memory load. Around 4 GB of memory are used, with additional 2--3 GB chached and buffered. \par
+The last figure juxtaposes the number of tables dropped with tables created (Fig. \ref{fig:mysql_create_drop}). Due to the architecture of the system, each table is replaced by its new version, meaning every \texttt{CREATE} is paired with a \texttt{DROP}, which is reflected in the presented chart.
+
+\begin{figure}
+    \centering
+    \includegraphics[width=\textwidth]{figures/mysql_network.png}
+    \caption{}
+    \label{fig:mysql_network}
+\end{figure}
+
+\begin{figure}
+    \centering
+    \includegraphics[width=\textwidth]{figures/mysql_performance.png}
+    \caption{}
+    \label{fig:mysql_performance}
+\end{figure}
+
+\begin{figure}
+    \centering
+    \includegraphics[width=\textwidth]{figures/mysql_create_drop.png}
+    \caption{}
+    \label{fig:mysql_create_drop}
 \end{figure}
 
 \section{Version control and project variation in time}
