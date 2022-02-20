@@ -1,6 +1,6 @@
 \chapter{Specification}
 \label{ch:specification}
-The presented system requests pages from card market website and scrapes their content to build a knowledge database helping the user take better decisions as a buyer. The results are presented in a form of a simple web application, as presented on Fig. \ref{fig:web_app} and \ref{fig:web_app_best_set_seller}, as well as in the form of graphs and plots in the \textit{analysis} directory.
+The presented system requests pages from card market website and scrapes their content to build a knowledge database helping the user take better decisions as a buyer. The results are presented in a form of a simple web application, as presented on Fig. \ref{fig:web_app}, as well as in the form of graphs and plots in the \textit{analysis} directory.
 
 \begin{figure}
     \centering
@@ -9,17 +9,11 @@ The presented system requests pages from card market website and scrapes their c
     \label{fig:web_app}
 \end{figure}
 
-\begin{figure}
-    \centering
-    \includegraphics[width=\textwidth]{figures/web_app_best_set_seller.png}
-    \caption{Searching for the user selling a batch of cards with given conditions}
-    \label{fig:web_app_best_set_seller}
-\end{figure}
-
 Implementation of the thesis topic involves a containerization software --- \textit{Docker} --- which hosts several subapplications written as semi-standalone scripts, each responsible for a part of the data pipeline. Using Python and its vast collection of libraries the author is handling the data scraping, intial cleaning and maintenance of the pre-stage database in compressed CSV files; as well as managing the MySQL database, creating helper tables, extracting new information and visualizing the data to answer user's questions. With JavaScript, SQL and HTML the web application is querying the database connected to a \textit{Node.js} server.
 
 
 \section{Functional requirements}
+\label{s:functional_req}
 The system is required to do the following:
 \begin{enumerate}
     \item The system should gather cards, sellers and offers' data and keep it up to date
@@ -35,6 +29,7 @@ The system is required to do the following:
 
 
 \section{Non-functional requirements}
+\label{s:nonfunctional_req}
 \begin{enumerate}
     \item The total time of data processing should be less than 6 hours
     \item The system should be standalone (bootstrapping itself from \textit{docker-compose.yml} and code), and cross-platform compatible
@@ -69,8 +64,28 @@ From the point of view of a card collectioner, every potential buy should be ana
     \item Additionally, present as much novel information and insights from the data as possible.
 \end{enumerate}
 
+\section{Use of Python}
+This project utilizes several crucial libraries, which are described in separate subsections below. The rest is briefly described in the following list:
+
+\begin{itemize}
+    \item \textit{checksumdir}: used for calculating a checksum of given directory, similar to a file checksum. It helps determine whether new data has arrived, is it complete and can it be passed further;
+    \item \textit{time}: used for measuring time between two points in code, sleeping (that is, stopping the execution) and getting information on the current date. Helps with scheduling the run until the day changes and measuring performance of various parts of code;
+    \item \textit{shutil}: used for creating and removing non-empty directories. Helps additionally isolate the shared data inside each container, so that it's invulnerable to changes in the original folder once running;
+    \item \textit{os}: used for managing local files and ensuring proper directory structure on the first run --- creating shared folders for storing data, logs and flags.
+\end{itemize}
+
+\subsection{Selenium and Beautiful Soup}
+These libraries make it possible to connect to any website and emulate user behaviour in an automatic way. Selenium is a framework responsible for creating a webdriver (virtual, in-code browser object) and visiting requested URLs, while looking for specific elements (like buttons for expanding the page) or deciding whether the response from the page is complete or it needs more time to load. Beautiful Soup on the other hand is a simple but powerful system for navigating HTML code. It provides support for finding particular webpage elements like \textit{div} or \textit{span}, by requesting their \textit{class}, \textit{id}, or any other attribute. Every HTML page is converted into a soup object, similar to a nested dictionary, which then can be searched using provided methods.
+
+\subsection{Numpy, Pandas and Scikit-learn}
+Numpy, briefly mentioned before, is a mathematical library which is a basis for many other libraries, such as Pandas or Scikit-learn. Pandas revolves around Dataframes and Series --- two- and one-dimensional data structures similar to Excel or SQL tables. One of the advantages is the speed of processing; selecting tens of thousands rows out of millions, based on some condition, is almost instantaneous. Dataframes come with set of tools for their manipulation, i.e. aggregation functions, joins, concatenation, etc. When this data is passed, scikit-learn is responsible for creating statistical models trying to find correlations, predict outcomes, as well as provide decision support based on the data. It is arguably one of the most important libraries in machine learning domain.
+
+\subsection{Matplotlib and Seaborn}
+Matplotlib and Seaborn are two libraries for data visualization, where the latter is an extension of the former. Matplotlib gives basic plotting functionalities and proves to be a robust module, which can be used on its own. However, in order to reduce the amount of code written and standardize the outcomes, Seaborn is used to provide more complex visualizations without an extensive use of Matplotlib.
+
+
 \section{Data warehouse modelling}
-The data warehouse lifecycle beings when the data is collected. The pre-stage area encompasses what is written in the CSV files after a gathering run. These files correspond to entities from subsection (\ref{entities}) and to the tables presented below.
+The data warehouse lifecycle beings when the data is collected. The pre-stage area encompasses what is written in the CSV files after a gathering run. These files correspond to entities from subsection \ref{entities} and to the tables presented below.
 
 \subsection{Base tables}
 \label{ss:base_tables}
@@ -91,7 +106,7 @@ The task of the \textit{firefox\_webdriver} container is to provide a constant a
 
 The \textit{mysql\_database} container hosts a database with persistent memory, storing the major part of the data warehouse and making it accessible to other containers.
 
-The \textit{data\_gathering} subsystem automatically scrapes and collects the web data in the \textit{data} directory, while \textit{database\_manager} takes this data and passes it to the database. It is important for the \textit{database\_manager} to be slightly delayed with respect to \textit{data\_gathering}, for reasons that are explained in section (\ref{container_orchestration}).
+The \textit{data\_gathering} subsystem automatically scrapes and collects the web data in the \textit{data} directory, while \textit{database\_manager} takes this data and passes it to the database. It is important for the \textit{database\_manager} to be slightly delayed with respect to \textit{data\_gathering}, for reasons that are explained in section \ref{container_orchestration}.
 
 The \textit{data\_miner} and \textit{node\_server} containers are dependent only on the database, however here boot order and system state are not as important; these asynchonous containers perform their job properly when the data is ready and don't cause critial failure when it's not, which is enough for the application to run reliably.
 

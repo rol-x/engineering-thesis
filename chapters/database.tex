@@ -1,4 +1,4 @@
-\chapter{Database management and data mining}
+\chapter{Data warehouse management and data mining}
 
 \label{ch:database}
 Up to this point, our data was stored in the \textit{data} directory in CSV format. The role of the database managing container is to take this data, ensure its correctness, and upload it to a MySQL database. MySQL was chosen because of relative simplicity paired with decent scalability. Additionaly, the only library used in relation to the database is \textit{mysql-connector-python}. \par
@@ -14,7 +14,7 @@ A data warehouse is a subject-oriented, integrated, time-variant, and nonvolatil
 
 \section{Database managing}
 
-The role of managing the connected database with regards to updating the data falls to the \textit{database\_manager} container. It's internal structure and configuration is similar to the \textit{data\_gathering} container, described in chapter (\ref{ch:gathering}).
+The role of managing the connected database with regards to updating the data falls to the \textit{database\_manager} container. It's internal structure and configuration is similar to the \textit{data\_gathering} container, described in chapter \ref{ch:gathering}.
 
 \subsection{Program configuration}
 The configurable global variables are stored in file \textit{config.py}. There are three subgroups inside:
@@ -43,15 +43,14 @@ The program, similar to data-gathering program, uses four services, three of whi
           This service provides the utility for managing datasets versions across containers; here we use it to check whether current dataset is indeed complete (in \textit{validated-checksums.sha1}), then to see whether it differs from the one that is currently in the database (\textit{database-checksum.sha1}). If it detects a disparity, the new data will be loaded, and its checksum saved to the latter file.
 
     \item \textit{Logs service}.
-          The use of this service is the same as described in the analogous section (\ref{s:used_services}) in the previous chapter.
+          The use of this service is the same as described in the analogous section \ref{s:used_services} in the previous chapter.
 \end{itemize}
 
-
 \subsection{Run scheduling}
-After the initial setup, the program enters a control loop deciding whtether to commence an update or not. First, it compares the checksums of local files and database content. If the newest data is already in the database, the program sleeps for 30 minutes. Otherwise, try to verify this new data by checking against the \textit{validated-checksums.sha1} file. Every time the dataset is concluded to be new, but not yet verified, the program waits 15 minutes.
+After the initial setup, the program enters a control loop deciding whtether to commence an update or not. First, it compares the checksums of local files and database content. If the newest data is already in the database, the program sleeps for 30 minutes. Otherwise, it tries to verify the new data by checking it against the \textit{validated-checksums.sha1} file. When the dataset is concluded to be new, but not yet verified, the program waits 15 minutes. After uploading the data, a 60-minute pause is initiated and the program begins the check again.
 
 \subsection{Tables from the staging area}
-When the data is gathered by the first container, it holds information about five entities: \textit{date, card, seller, card\_stats} and \textit{sale\_offer}. The data types of their attributes are dictated by the type of information they convey and are defined as described in subsection (\ref{ss:base_tables}). \par
+When the data is gathered by the first container, it holds information about five entities: \textit{date, card, seller, card\_stats} and \textit{sale\_offer}. The data types of their attributes are dictated by the type of information they convey and are defined as described in subsection \ref{ss:base_tables}. \par
 In order to upload the data to the database, uncompressed CSV files are copied to \textit{/var/lib/mysql-files} directory inside the container. This allows for the \texttt{LOAD FILE} query to be executed, drastically improving the processing speed.
 
 
@@ -61,16 +60,41 @@ The data is also read into the mining module and transformed into Dataframes, ta
 
 
 \subsection{Program configuration}
-The config.py file holds
+The config.py file holds variables related to the database connection and log files, similar to the \textit{database\_manager}. Fixed variables comprise container delay, here set to 60 seconds, and the project name. There is one control variable to be set when the \textit{sale\_offer} table has more than 10 million records, to change the data retrieval method.
 
 
 \subsection{Used services}
-What modules are used in the subproject?
-What are the differences in the services?
+\begin{itemize}
+    \item \textit{Database service}.
+          Responsible for handling the connection to the database, checking its state, the newest date and creating the helper tables through SQL queries.
+
+    \item \textit{Mining service}.
+          Loads the data saved in the database and performs exploratory analysis, saving the results to the \textit{analysis} directory.
+
+    \item \textit{Flags service}.
+          Here the service is used to ensure that there is no new verified dataset to be uploaded to the database --- in that case the program waits 5 minutes for the database manager to load the data.
+
+    \item \textit{Logs service}.
+          The use of this service is the same as described in the analogous section \ref{s:used_services} in the previous chapter.
+\end{itemize}
 
 \subsection{Run scheduling}
-How is the run scheduled? What indicators are present?
+The run is halted for 5 minutes, whenever new data is about to be uploaded to the database. When the \textit{database\_manager} container's job is done, the database connection is established and the number of tables is checked. If it's less than 5, the analysis cannot be performed, and the program is set up to wait 120 seconds and query the database again. Should the number of tables be correct, the data transformation run is commenced. After finishing the program waits 60 minutes and begins the routine again. This way, data mining is not dependent on the database content, which may change 23 hours within a day, resulting in 23 correct separate analyses.
 
-\subsection{Feature extraction}
-What new features can be discovered?
-\url{https://www.analyticsvidhya.com/blog/2021/04/guide-for-feature-extraction-techniques/}
+\subsection{Data analysis}
+\label{ss:data_analysis}
+Apart from creating the helper tables, an analysis is performed on the collected data. Appropriate directory is created and the five dataframes undergo many transformations to extract the following information:
+
+\begin{itemize}
+    \item actual rarity, number of cards in each rarity class;
+    \item amount of sellers with public address, by seller type;
+    \item site popularity from the number of new users each year;
+    \item number of new sellers by year and seller type;
+    \item ranking of countries with the most sellers;
+    \item price statistics trends, average price history;
+    \item average price statistics distributions;
+    \item the number of available marketable items over time;
+    \item new attribute indicating market rarity, inverse ratio of card availability to mean availability;
+    \item heatmap of correlations between prices, available items and the calculated market rarity;
+    \item a plot of each card's 50 best sale prices and when they occured with the best 30 and 10 offers marked differently (in total 264 plots in the \textit{analysis/cards} subdirectory).
+\end{itemize}

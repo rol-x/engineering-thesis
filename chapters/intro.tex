@@ -1,6 +1,6 @@
 \chapter{Introduction}
 \label{ch:intro}
-The subject of this engineering thesis is a standalone data warehouse built using multiple Docker containers. The thesis describes how the data is gathered, processed and analyzed, and what components make up each container, as well as their mutual coordination. Additionally, practical results of the project are presented in form of answers to real-world questions, together with steps taken to achieve performance optimization and code robustness. \par
+The subject of this engineering thesis is a standalone data warehouse built using multiple Docker containers. The thesis describes how the data is gathered, processed and analyzed, and what components make up each container, as well as their mutual coordination. Additionally, practical results of the project are presented in form of answers to business questions, together with steps taken to achieve performance optimization and code robustness. \par
 The basic assumptions of the system are the following:
 \begin{enumerate}
     \item The application is portable, standalone and platform-independent.
@@ -11,7 +11,7 @@ The basic assumptions of the system are the following:
 
 
 \section{Scope of the work}
-The work done in relation to one of the containers in this project is partially based on a group project\footnote{Group members: Jakub Sieńko, Kacper Garcon and the author, collaborating during an university course \textit{Data Warehouses and Data Mining Systems}}, concerned with the acquisition of data from a web service in order to answer simple questions with SQL queries. For that project, the author of this thesis implemented the data gathering part using Python language with Selenium module. This individual work has been transfered and heavily modified in order to compose a container-based solution, with other containers written by the author from scratch for the purpose of this thesis. \par
+The work done in relation to one of the containers in this project is partially based on a group project\footnote{Group members: Jakub Sieńko, Kacper Garcon and the author, collaborating during an university course \textit{Data Warehouses and Data Mining Systems}, conducted and supervised by dr Anna Gorawska, the promoter of this thesis}, concerned with the acquisition of data from a web service in order to answer simple questions with SQL queries. For that project, the author of this thesis implemented the data gathering part using Python language with Selenium module. This individual work has been transfered and heavily modified in order to compose a container-based solution, with other containers written by the author from scratch for the purpose of this thesis. \par
 In totality, the following parts were implemented:
 \begin{itemize}
     \item data gathering container,
@@ -24,13 +24,13 @@ In totality, the following parts were implemented:
     \item web scraping Selenium-based service,
     \item data management service.
 \end{itemize}
-Additionally, the author researched topics concerned with container orchestration as a simplification of system architecture; Selenium framework for dynamic web data retrieval; optimization of ``big data'' SQL queries and management of large datasets; web applications development in Node.js environment and other related fields.
+Additionally, the author researched topics concerned with container orchestration as a simplification of system architecture, Selenium framework for dynamic web data retrieval, optimization of ``big data'' SQL queries and management of large datasets, web applications development in Node.js environment and other related fields.
 
 
 \section{Thesis contents}
-Chapter (\ref{ch:basis}) is concerned with the changes in technology leading to various options of exploiting data availability on the Internet, while also deliniating the tools which are at the core of this project. It also explains the motivation for choosing such thesis topic. \par
-Chapter (\ref{ch:specification}) describes the domain of the problem with functional and non-functional requirements of the system. It also gives a high-level view of the data warehouse and the data inside it. \par
-Chapter (\ref{ch:architecture}) contains technical information about the coordination of the containers, how they utilize the services and gives an overview of the data pipeline. \par
-Chapters (\ref{ch:gathering}) and (\ref{ch:database}) are centered around the three main containers, taking a deep dive inside each one of them and following the data on its path from the website to market reports. \par
-Chapter (\ref{ch:results}) reflects on the practical results generated from the data analysis, while constrasting them with initially posed questions. Additionally, the chapter describes the performance of the code under normal and abnormal conditions, and how the project changed with time. \par
-Chapter (\ref{ch:summary}) summarizes the effects achieved during the implementation of the system and formulates conclusions about possibilities of utilizing containerization to create and manage data warehouses.
+Chapter \ref{ch:basis} is concerned with the changes in technology leading to various options of exploiting data availability on the Internet, while also deliniating the tools which are at the core of this project. It also explains the motivation for choosing such thesis topic. \par
+Chapter \ref{ch:specification} describes the domain of the problem with functional and non-functional requirements of the system. It also gives a high-level view of the data warehouse and the data inside it. \par
+Chapter \ref{ch:architecture} contains technical information about the coordination of the containers, how they utilize the services and gives an overview of the data pipeline. \par
+Chapters \ref{ch:gathering} and \ref{ch:database} are centered around the three main containers, taking a deep dive inside each one of them and following the data on its path from the website to market reports. \par
+Chapter \ref{ch:results} reflects on the practical results generated from the data analysis, while constrasting them with initially posed questions. Additionally, the chapter describes the performance of the code under normal and abnormal conditions, and how the project changed with time. \par
+Chapter \ref{ch:summary} summarizes the effects achieved during the implementation of the system and formulates conclusions about possibilities of utilizing containerization to create and manage data warehouses.

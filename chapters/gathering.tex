@@ -68,19 +68,35 @@ The pickle data format posed another challenge: unexpected errors concerning pic
 \end{figure}
 
 \section{Loop over cards}
-The program works by querying the local TXT file with names of the cards and creating proper card urls according to a template. The webdriver loads the page with explicit wait time equal to 1.5 seconds, which gives this much time for the request elements to load. The card page features all the card information and a list of sale offers which can be expanded by clicking a ``Load more'' button on the bottom of the page. This button is one of the reasons for the use of Selenium framework as opposed to \textit{requests}. We need dynamic control of the webpage to interact with the button, until all the offers are loaded. After each click, the program waits up to 1.5 seconds. \par Getting this page is the most network-heavy operation of the code, thus we save the complete webpage as a soup object to be deconstructed later. Each card soup is passed to appropriate methods to extract the card statis information and statistics, as well as the list of offers. After the card processing is completed, a \texttt{START\_FROM} counter is incremented, so that the program can pick up from the last completed task (provided it doesn't fail into restart). After all card pages have been visited, acquired and processed, we clean and unpickle the data, then the program control comes back to the scheduler, where the data can be checked for completness and validated. (IMAGE CARD PAGE)
+The program works by querying the local TXT file with names of the cards and creating proper card urls according to a template. The webdriver loads the page with explicit wait time equal to 1.5 seconds, which gives this much time for the request elements to load. The card page features all the card information (Fig. \ref{fig:card_page}) and a list of sale offers which can be expanded by clicking a ``Load more'' button on the bottom of the page (Fig. \ref{fig:offers_table}). This button is one of the reasons for the use of Selenium framework as opposed to \textit{requests}. We need dynamic control of the webpage to interact with the button, until all the offers are loaded. After each click, the program waits up to 1.5 seconds. \par Getting this page is the most network-heavy operation of the code, thus we save the complete webpage as a soup object to be deconstructed later. Each card soup is passed to appropriate methods to extract the card statis information and statistics, as well as the list of offers. After the card processing is completed, a \texttt{START\_FROM} counter is incremented, so that the program can pick up from the last completed task (provided it doesn't fail into restart). After all card pages have been visited, acquired and processed, we clean and unpickle the data, then the program control comes back to the scheduler, where the data can be checked for completness and validated.
+
+\begin{figure}
+      \centering
+      \includegraphics[width=\textwidth]{figures/card_page.png}
+      \caption{A \textit{div} element holding card info from its webpage}
+      \label{fig:card_page}
+\end{figure}
+
+\begin{figure}
+      \centering
+      \includegraphics[width=\textwidth]{figures/offers_table.png}
+      \caption{A table of sale offers on given card page}
+      \label{fig:offers_table}
+\end{figure}
 
 \section{Soup decomposition}
-The card page source, packed in a soup format, is used to get the name of the card. If no such card exists in our records, it is added, together with (IMAGE LOGS ADD NEW CARD) the expansion name, rarity and a unique id. The time-related card characteristics are acquired every time. They need to be updated daily and the most recent data has priority. In case of second run of the day the saved card stats are dropped.
-(IMAGE CARD STATS)
+The card page source, packed in a soup format, is used to get the name of the card. If no such card exists in our records, it is added, together with the expansion name, rarity and a unique id. The time-related card characteristics are acquired every time. They need to be updated daily and the most recent data has priority. In case of second run of the day the saved card stats are dropped.
 
 \subsection{Sale offers table}
-(IMAGE TABLE SALE OFFERS)
-Understanding the table of sale offers.
-
-A list of sellers names if acquuired from the source code of the page, along with the list of prices, card conditions and other sale-related information. The seller names are stored in a set, from which we substract all the names of already known sellers. The remaining names are to be saved, so appropriate user page URLs are generated according to a template. Then, every new seller page is visited and data about them is saved to the seller collection. (IMAGE SELLER PAGE) Due to sellers being added cumulatively into the dataframe (use of \texttt{append(seller: dict)}) caused pickles-related fiasco. \par
+A list of sellers names if acquired from the source code of the page, along with the list of prices, card conditions and other sale-related information. The seller names are stored in a set, from which we substract all the names of already known sellers. The remaining names are to be saved, so appropriate user page URLs are generated according to a template. Then, every new seller page is visited and data about them is saved to the seller collection (Fig. \ref{fig:seller_page}). Due to sellers being added cumulatively into the dataframe (use of \texttt{append(seller: dict)}) caused pickles-related fiasco. \par
 Updating sale offers is possible because the separate lists of seller names, prices, conditions and other, can be zipped into a dictionary. This way, we're scanning the table vertically and concatenating the attributes together to form a new set of records to be added to the sale offers file. If the offers are already saved that day, the old ones are dropped in favor of the new ones. Complete update however, happend only at the end of the run, when the pickled data is used to replace the pre-run data.
 
+\begin{figure}
+      \centering
+      \includegraphics[width=\textwidth]{figures/seller_page.png}
+      \caption{A \textit{div} element with seller information on their webpage}
+      \label{fig:seller_page}
+\end{figure}
 
 \section{Data pipeline output}
 When the program is finished we have a complete list of card names, separate CSV file of static cards information with their IDs. The file with card statistics will have 264 new entries corresponding to each card and any new sellers will be saved in their CSV file. The sale offers file is going to have about 90000 more entries, representing the offers placed by sellers for each card. All the data is stored in five compressed CSV files and one TXT file. The data is ready to be checked for completion (e.g. to detect 263 cards gathered instead of 264). When the data is verified to be complete, a checksum of the data directory is calculated and saved in the validated-checksums.md5 file, so that other containers can recognize this dataset as ready to be pushed forward the data pipeline.
